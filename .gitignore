@@ -1,0 +1,15 @@
+# Dune / OCaml build output
+_build/
+*.install
+*.merlin
+.merlin
+
+# opam local switch
+_opam/
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
