@@ -10,6 +10,23 @@ does not.
 
 Delete every prompt in italics as you replace it.
 
+The headings below are in the **same order as the MS1 report template**, so the
+report's "Our team contract" section can be assembled straight from this file.
+
+## What we hope to get out of the project
+
+*The MS1 report template opens the contract with this, and the handout says to
+start here: tell one another what you hope to get out of the project and what
+you need from the team. Schedules, interests and ways of working differ, so say
+so now rather than discovering it in week three.*
+
+One or two lines per person, in their own words.
+
+- Victor Zhu (vlz3):
+-
+-
+-
+
 ## Communication and meetings
 
 *Where will you communicate? How often will you check messages, and how quickly
@@ -67,7 +84,7 @@ justifying every part of what they submit. Your agreements must respect that.
 - Who reviews it, and how we check the author understands it:
 - If we disagree about its use:
 
-## Revisiting this agreement
+## Revisiting the contract
 
 *When will you check whether these arrangements are working, and how will you
 change them together?*
