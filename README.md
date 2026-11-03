@@ -62,10 +62,48 @@ created for MS2.
 
 ## Documents
 
-- [Team contract](docs/TEAM-CONTRACT.md) — how we work together.
+- [Team contract](docs/TEAM-CONTRACT.md) — how we work together, plus the
+  responsibility table. The project handout asks us to keep that table shared
+  and up to date, so it explains what each member actually delivered by the end.
+- [AUTHORS.md](AUTHORS.md) — contributing authors, libraries, adapted sources,
+  assets, and AI use. Required by the project handout and included in the MS2
+  and MS3 submission ZIPs.
+
+## Milestones
+
+| Milestone | Due | Weight | Deliverable |
+|---|---|---|---|
+| MS1 Startup | Wed Nov 4, 9:00 pm | 2% | `MS1Report.pdf` on Gradescope, 3-4 pages |
+| MS2 Work in Progress | see Canvas | 4% | `source.zip` + `MS2Report.pdf`, about 6 pages |
+| MS3 Release | see Canvas | 8% | `source.zip` + `MS3Report.pdf` + `INSTALL.md` + video + `gallery.yaml` |
+
+Peer evaluations are a further 4%. Each milestone also has a **required meeting
+with a member of course staff**. Every report must begin with the team name,
+members and NetIDs, project title, and a clickable URL for this repository.
+
+MS2 and MS3 are graded from the uploaded ZIP rather than from this repository,
+so the repo can keep moving while a milestone is under review. The ZIP must
+leave out build output, local OPAM switches and git metadata, which is what the
+`.gitignore` here is for.
+
+## Requirements to keep in mind as we build
+
+- A **new** OCaml project. Not a continuation of a course assignment, and not
+  work submitted for another course.
+- Target scope comparable to **A1 and A2 combined**, independent of team size.
+- One application whose parts work together, requiring the team to agree on how
+  the pieces fit. A menu over separate programs does not qualify.
+- An `.mli` with OCamldoc specifications for every implementation module, except
+  the main driver and test modules.
+- An automated suite runnable with `dune test`, using OUnit and/or Cram.
+- Important behavior testable separately from the interface.
+- `AUTHORS.md` kept current.
 
 ## Course requirements this repository satisfies
 
-- Public on github.com, so course staff can read it without individual invitations.
+- Public on github.com, so course staff can read it without individual
+  invitations. MS2 and MS3 both say to keep the access arrangement set up for
+  MS1, so this host is fixed for the whole project.
 - A README naming the team and its members.
 - One separate, correctly attributed commit per member.
+- `AUTHORS.md` identifying contributing authors and acknowledging sources.
