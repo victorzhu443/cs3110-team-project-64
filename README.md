@@ -65,6 +65,8 @@ created for MS2.
 - [Team contract](docs/TEAM-CONTRACT.md) — how we work together, plus the
   responsibility table. The project handout asks us to keep that table shared
   and up to date, so it explains what each member actually delivered by the end.
+- [MS1 report draft](docs/MS1-REPORT.md) — write the report here together, then
+  export to PDF for Gradescope. Sections match the official template.
 - [MS1 checklist](docs/MS1-CHECKLIST.md) — what the report must contain, from
   the official template, and what is still outstanding.
 - [AUTHORS.md](AUTHORS.md) — contributing authors, libraries, adapted sources,
