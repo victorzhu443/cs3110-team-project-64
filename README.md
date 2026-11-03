@@ -1,10 +1,10 @@
-# Team Project NN — PROJECT NAME
+# Team Project 64 — PROJECT NAME
 
 CS 3110, Cornell University, Fall 2026.
 
-> **Placeholders to replace.** The heading above must become your real Canvas
-> team name, which keeps the `Team Project NN` prefix, plus your project name.
-> Rename the repository to match once the team agrees on it.
+> **One placeholder left.** The team name is set: Team Project 64, matching
+> Canvas. Replace `PROJECT NAME` in the heading above, in `AUTHORS.md`, and in
+> `docs/TEAM-CONTRACT.md` once the team agrees on the project.
 
 ## What this is
 
@@ -41,8 +41,8 @@ confirm addresses at https://github.com/settings/emails
 Then add your row and push:
 
 ```
-git clone https://github.com/victorzhu443/cs3110-team-project.git
-cd cs3110-team-project
+git clone https://github.com/victorzhu443/cs3110-team-project-64.git
+cd cs3110-team-project-64
 # edit README.md: add one row to the Team members table
 git add README.md
 git commit -m "Add <Your Name> (<netid>) to team members"
@@ -50,7 +50,7 @@ git push
 ```
 
 Finally, confirm your commit shows your name and avatar at
-https://github.com/victorzhu443/cs3110-team-project/commits/main
+https://github.com/victorzhu443/cs3110-team-project-64/commits/main
 
 If two people edit the table at once, git will report a conflict in README.md.
 Keep both rows, then `git add README.md` and `git commit`.

@@ -1,6 +1,6 @@
 # Team contract
 
-**Team Project NN — PROJECT NAME** · CS 3110, Fall 2026
+**Team Project 64 — PROJECT NAME** · CS 3110, Fall 2026
 
 Write this together, in one sitting if you can. The MS1 handout weights
 responsibilities and this contract at 40%, and it asks for concrete agreements
