@@ -21,6 +21,7 @@ below.
 |---|---|---|
 | Victor Zhu | vlz3 | [@victorzhu443](https://github.com/victorzhu443) |
 | Akshay Joshi | amj222 | [@akshay-joshi23](https://github.com/akshay-joshi23) |
+| Anvi Savant | as3568 | [@anvisavant](https://github.com/anvisavant) |
 
 ## How to add yourself (every teammate does this once)
 
