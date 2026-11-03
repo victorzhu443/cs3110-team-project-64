@@ -7,6 +7,7 @@
 | Name | NetID |
 |---|---|
 | Victor Zhu | vlz3 |
+| Sohan Madishetty | skm254 |
 
 *Each teammate adds their own row, in their own commit, alongside the row they
 add to the README.*
