@@ -8,6 +8,7 @@
 |---|---|
 | Victor Zhu | vlz3 |
 | Sohan Madishetty | skm254 |
+| Alex Fisher | aif39 |
 
 *Each teammate adds their own row, in their own commit, alongside the row they
 add to the README.*

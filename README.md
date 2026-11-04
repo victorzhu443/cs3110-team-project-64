@@ -23,6 +23,7 @@ below.
 | Akshay Joshi | amj222 | [@akshay-joshi23](https://github.com/akshay-joshi23) |
 | Anvi Savant | as3568 | [@anvisavant](https://github.com/anvisavant) |
 | Sohan Madishetty | skm254 | [@SohanMads](https://github.com/SohanMads) |
+| Alex Fisher | aif39 | [@alex-fishr](https://github.com/alex-fishr) |
 
 ## How to add yourself (every teammate does this once)
 
