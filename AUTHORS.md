@@ -1,6 +1,6 @@
 # Authors
 
-**Team Project 64 — PROJECT NAME** · CS 3110, Cornell University, Fall 2026
+**Team 64 LaserTracer** · CS 3110, Cornell University, Fall 2026
 
 ## Contributing authors
 

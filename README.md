@@ -1,16 +1,26 @@
-# Team Project 64 — PROJECT NAME
+# Team 64 LaserTracer
 
 CS 3110, Cornell University, Fall 2026.
 
-> **One placeholder left.** The team name is set: Team Project 64, matching
-> Canvas. Replace `PROJECT NAME` in the heading above, in `AUTHORS.md`, and in
-> `docs/TEAM-CONTRACT.md` once the team agrees on the project.
+> **The game's own name is still TBD** (`Lumen` is the current candidate). Once
+> the team settles it, add it here and in `AUTHORS.md`.
 
 ## What this is
 
-One or two sentences describing what the project does, written so a reader who
-has never seen it can picture someone using it. Replace this once the team has
-settled on the idea in MS1.
+A light-beam puzzle game for the terminal. Each level is a grid with light
+sources, walls, and colored targets. You get a small set of pieces — mirrors to
+turn a beam, splitters to send it two ways, prisms to split white light into red,
+green, and blue, filters to pass one color, combiners to mix them — and you place
+and rotate them until every target is lit in the right color.
+
+What makes it worth building: the levels are **generated and proven solvable**,
+not hand-designed. A generator works backwards from a seed, and a solver checks
+the result, counts its solutions, and rates its difficulty. The same solver
+powers progressive hints and a warning when your current placement can no longer
+lead to any solution.
+
+The backup idea, if the solver turns out to be too slow, is a terminal Texas
+Hold'em game against computer opponents.
 
 ## Team members
 

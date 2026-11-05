@@ -1,25 +1,28 @@
 # MS1 checklist
 
-Due **Wed Nov 4, 2026, 9:00 pm**. Worth 2% of the course grade. One person
-uploads `MS1Report.pdf` to Gradescope, then adds every teammate to the
-submission. Aim for three to four pages. PDF strongly preferred.
+**Submitted 2026-11-04**: `MS1Report.pdf`, 4 pages, with all five members
+listed on the Gradescope submission. Due was Wed Nov 4, 9:00 pm, with a grace
+window to 11:59 pm. Worth 2% of the course grade.
+
+Kept as the record of what MS1 asked for, since MS2 and MS3 build on the same
+contract, responsibility table, and repository arrangement.
 
 ## The report, from the official template
 
 In this order:
 
-- [ ] Team name: `Team <number> <name>`
-- [ ] Members and NetIDs
-- [ ] Repository URL, as a clickable link
-- [ ] **Our team contract** — see `TEAM-CONTRACT.md`, whose headings match the
+- [x] Team name: `Team <number> <name>`
+- [x] Members and NetIDs
+- [x] Repository URL, as a clickable link
+- [x] **Our team contract** — see `TEAM-CONTRACT.md`, whose headings match the
       template's order: what we hope to get out of the project; communication
       and meetings; decisions; commitments and problems; review and
       integration; AI use; revisiting the contract
-- [ ] **Our project proposal** — about one page on the main idea, plus one
+- [x] **Our project proposal** — about one page on the main idea, plus one
       paragraph on the backup idea
-- [ ] **Initial responsibilities** — the table of area, primary owner, backup
+- [x] **Initial responsibilities** — the table of area, primary owner, backup
       owner, and what the owner will deliver
-- [ ] **Where we'll start** — what we implement first for MS2, one uncertainty
+- [x] **Where we'll start** — what we implement first for MS2, one uncertainty
       we'll investigate early and how, and what each member will actively
       contribute
 
@@ -41,7 +44,8 @@ In this order:
 - [x] Every teammate has pushed their own commit
 - [x] Teammates added as collaborators — all four invitations accepted
 - [x] Repository renamed to the real team name
-- [ ] Shared communication channel chosen, with a test message everyone replied to
+- [x] Shared communication channel chosen — the iMessage group chat, named in
+      the submitted contract
 - [ ] `AUTHORS.md` rows for Akshay and Anvi — they are in the README but not yet
       in `AUTHORS.md`, which ships inside the MS2 and MS3 ZIPs
 
