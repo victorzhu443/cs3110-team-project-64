@@ -36,11 +36,14 @@ In this order:
 - [x] Public repository that staff can read without invitations
 - [x] README with the team name
 - [x] A members table
-- [x] One separate, correctly attributed commit per member — Victor done
-- [ ] Every teammate has pushed their own commit
-- [ ] Teammates added as collaborators
-- [ ] Repository renamed to the real team name
+- [x] One separate, correctly attributed commit per member — all five done, each
+      linked to the right GitHub account
+- [x] Every teammate has pushed their own commit
+- [x] Teammates added as collaborators — all four invitations accepted
+- [x] Repository renamed to the real team name
 - [ ] Shared communication channel chosen, with a test message everyone replied to
+- [ ] `AUTHORS.md` rows for Akshay and Anvi — they are in the README but not yet
+      in `AUTHORS.md`, which ships inside the MS2 and MS3 ZIPs
 
 ## Things the handouts require that are easy to miss
 
