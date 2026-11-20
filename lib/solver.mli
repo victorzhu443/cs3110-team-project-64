@@ -34,8 +34,10 @@
     - Every piece given is placed, each in a cell of its own.
     - Only cells from [slots] are used.
     - A piece that can be rotated is tried in each of its orientations.
-    - The search is exhaustive: if it returns [None], no assignment of those
-      pieces to those cells satisfies [solved]. *)
+    - The search is exhaustive {i over the cells it is offered}: with the
+      default [?candidates], [None] means no assignment of those pieces to those
+      cells satisfies [solved]. With a [?candidates] that drops cells, [None]
+      means only that no assignment among the cells it offered does. *)
 
 type placement = {
   piece : Types.piece;  (** The piece, in the orientation it is placed in. *)
@@ -49,8 +51,12 @@ val rotations : Types.piece -> Types.piece list
 
     A mirror or a splitter has four, one per {!Types.orientation}. Every other
     piece has one: a source, a wall and a target are part of the level, not
-    pieces the player turns. The order is the order of {!Types.orientation}, so
-    a search over rotations is deterministic. *)
+    pieces the player turns.
+
+    The order is {!Board.rotate}'s cycle — [Horizontal], [Backslash],
+    [Vertical], [Slash] — begun at the piece's own orientation, so trying the
+    forms in order is the same as pressing rotate repeatedly, and a search over
+    them is deterministic. *)
 
 val search :
   ?candidates:(placement list -> Types.pos list -> Types.pos list) ->
@@ -80,7 +86,13 @@ val search :
     pruning the MS1 proposal promised.
 
     Placing [k] pieces among [n] cells is {m O(n^k)} in the worst case, times
-    the cost of [solved]. See [docs/investigations/solver-timing.md] (VIC-6) for
-    what that means in practice on 6x6 and 8x8 boards.
+    the cost of [solved]. Pieces are placed in the order given and are not
+    compared, so [k] identical pieces are tried in all [k!] orders and the same
+    arrangement is handed to [solved] that many times. Two mirrors therefore
+    cost twice what they need to, three cost six times. Harmless for MS2, but
+    the counts in [docs/investigations/solver-timing.md] carry that factor, and
+    skipping repeats is the cheapest speed-up available after pruning. See
+    [docs/investigations/solver-timing.md] (VIC-6) for what that means in
+    practice on 6x6 and 8x8 boards.
 
     @raise Invalid_argument if [slots] holds a repeated position. *)
