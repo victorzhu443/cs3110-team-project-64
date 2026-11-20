@@ -64,10 +64,10 @@ val place : t -> pos -> piece -> (t, error) result
 
 val rotate : t -> pos -> (t, error) result
 (** [rotate b p] is [b] with the player piece at [p] turned 45 degrees
-    clockwise. Orientations cycle [Horizontal] to [Slash] to [Vertical] to
-    [Backslash] and back to [Horizontal], so four rotations return a piece to
-    where it started. Errors: [Out_of_bounds]; [Not_player_piece] if the cell is
-    empty or holds a fixed piece. *)
+    clockwise. Orientations cycle [Horizontal] to [Backslash] to [Vertical] to
+    [Slash] and back to [Horizontal], so four rotations return a piece to where
+    it started. Errors: [Out_of_bounds]; [Not_player_piece] if the cell is empty
+    or holds a fixed piece. *)
 
 val remove : t -> pos -> (t, error) result
 (** [remove b p] is [b] with the player piece at [p] taken off, leaving the cell

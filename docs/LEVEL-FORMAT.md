@@ -68,8 +68,8 @@ Decided with AKS-2 (plan section 5.4):
 
 - Players place only mirrors and splitters, on any empty cell, including the
   cell right in front of a source.
-- Rotating turns a player piece 45 degrees clockwise: `-` to `/` to `|` to `\`
-  and back. Fixed pieces never rotate.
+- Rotating turns a player piece 45 degrees clockwise: `-` to `\` to `|` to `/`
+  and back to `-`. Fixed pieces never rotate.
 
 ## Errors
 
