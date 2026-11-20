@@ -74,6 +74,33 @@ Keep both rows, then `git add README.md` and `git commit`.
 Nothing is built yet. MS1 is a plan, not a prototype. The OCaml project will be
 created for MS2.
 
+## Running the tests
+
+The tests use OUnit. If `dune test` reports that `ounit2` is missing, run
+`opam install ounit2`.
+
+From the repository root:
+
+```
+dune build            # compile everything
+dune test             # run every test file in test/
+dune test --force     # run them again even if nothing changed
+```
+
+Each test file prints one dot per passing test, then a line such as
+`Ran: 5 tests in: 0.10 seconds.` followed by `OK`. A failure prints `FAILED`,
+the name of the failing test, and its message. To run a single file, for
+example the generator's tests:
+
+```
+dune exec test/test_generator.exe
+```
+
+There is one test file per module, `test/test_<module>.ml`. Helpers shared by
+several files are in `test/test_util.ml`. Expected answers are worked out by
+hand from a drawing of the board, or are properties that must hold for every
+input. They are never copied from what the code printed.
+
 ## Documents
 
 - [Team contract](docs/TEAM-CONTRACT.md) — how we work together, plus the
