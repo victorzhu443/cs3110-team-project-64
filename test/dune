@@ -1,0 +1,19 @@
+(tests
+ (names
+  test_board
+  test_level
+  test_tracer
+  test_solver
+  test_generator
+  test_game
+  test_render)
+ (modules
+  test_util
+  test_board
+  test_level
+  test_tracer
+  test_solver
+  test_generator
+  test_game
+  test_render)
+ (libraries lumen ounit2))
