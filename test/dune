@@ -16,4 +16,4 @@
   test_generator
   test_game
   test_render)
- (libraries lasertracer ounit2))
+ (libraries lumen ounit2))

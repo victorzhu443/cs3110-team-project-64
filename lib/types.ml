@@ -48,3 +48,17 @@ let string_of_color c =
   | true, false, true -> "magenta"
   | false, true, true -> "cyan"
   | true, true, true -> "white"
+
+let string_of_orientation = function
+  | Horizontal -> "-"
+  | Slash -> "/"
+  | Vertical -> "|"
+  | Backslash -> "\\"
+
+let string_of_piece = function
+  | Source (dir, color) ->
+      "source " ^ string_of_dir dir ^ " " ^ string_of_color color
+  | Wall -> "wall"
+  | Target color -> "target " ^ string_of_color color
+  | Mirror orientation -> "mirror " ^ string_of_orientation orientation
+  | Splitter orientation -> "splitter " ^ string_of_orientation orientation

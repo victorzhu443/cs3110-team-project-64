@@ -40,3 +40,13 @@ val string_of_dir : dir -> string
 val string_of_color : color -> string
 (** [string_of_color c] is a readable name for [c]: one of ["black"], ["red"],
     ["green"], ["blue"], ["yellow"], ["magenta"], ["cyan"], or ["white"]. *)
+
+val string_of_orientation : orientation -> string
+(** [string_of_orientation o] is the one-character symbol for [o], as described
+    by {!orientation}. *)
+
+val string_of_piece : piece -> string
+(** [string_of_piece p] is the lowercase piece name followed by its attributes
+    separated by spaces. Sources include direction then color, targets include
+    color, and mirrors and splitters include their orientation symbol. For
+    example, ["source NE red"], ["target blue"], and ["mirror /"]. *)
