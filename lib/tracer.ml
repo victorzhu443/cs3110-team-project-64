@@ -1,9 +1,9 @@
 open Types
 
-type segment = { at : pos; dir : dir; color : color }
+type segment = { at : pos; entered : dir; dir : dir; color : color }
 
 type ending = { last : pos; heading : dir; beam_color : color; reason : stop }
-and stop = Left_board | Hit_wall | Hit_target | Looped
+and stop = Left_board | Hit_wall | Hit_mirror_edge | Looped
 
 type result = {
   segments : segment list;
@@ -37,8 +37,8 @@ let dir_of_delta (dr : int) (dc : int) : dir =
 let reflect (o : orientation) (d : dir) : dir =
   let dr, dc = delta d in
   (* Mirroring a vector in a line: flip the component across the line. A
-     direction lying along the line comes back unchanged, which is why a beam
-     meeting a mirror edge-on carries straight on. *)
+     direction lying along the line comes back unchanged; the tracer treats that
+     case as the beam meeting the mirror edge-on, which stops it. *)
   let dr', dc' =
     match o with
     | Horizontal -> (-dr, dc)
@@ -47,6 +47,11 @@ let reflect (o : orientation) (d : dir) : dir =
     | Backslash -> (dc, dr)
   in
   dir_of_delta dr' dc'
+
+(** [mix a b] is the color made by two beams together: each channel is on if it
+    is on in either beam. *)
+let mix (a : color) (b : color) : color =
+  { r = a.r || b.r; g = a.g || b.g; b = a.b || b.b }
 
 let trace_grid ~(rows : int) ~(cols : int) ~(cell_at : pos -> piece option) :
     result =
@@ -62,47 +67,52 @@ let trace_grid ~(rows : int) ~(cols : int) ~(cell_at : pos -> piece option) :
       (List.init rows (fun row -> row))
   in
   let segments = ref [] and endings = ref [] in
-  (* The first beam to reach a target is the one reported, so later arrivals do
-     not overwrite it. *)
+  (* The color reaching each target: the mix of every beam that passed
+     through it so far. *)
   let arrivals : (pos, color) Hashtbl.t = Hashtbl.create 16 in
-  (* A beam is in a loop when it re-enters a cell travelling the same way. The
-     table is per source: two different sources crossing one cell alike is not a
-     loop, but a splitter's own branch coming back around is. *)
+  (* A beam is in a loop when it is about to enter a cell travelling the same
+     way as before. The table is per source: two different sources crossing one
+     cell alike is not a loop, but a splitter's own branch coming back around
+     is. *)
   let visited : (pos * dir, unit) Hashtbl.t = Hashtbl.create 64 in
-  let record_segment at dir color =
-    segments := { at; dir; color } :: !segments
+  let record_segment at entered dir color =
+    segments := { at; entered; dir; color } :: !segments
   in
   let record_ending last heading beam_color reason =
     endings := { last; heading; beam_color; reason } :: !endings
   in
-  (* [walk ~first p d c] follows a beam that is on cell [p] heading [d]. On the
-     source's own cell [first] is true, so the source does not act on its own
-     beam. [emit] leaves a cell in direction [d]; [halt] ends the beam there. *)
+  (* [walk ~first p d c] follows a beam that has just entered cell [p] heading
+     [d]. On the source's own cell [first] is true, so the source does not act
+     on its own beam. [emit] leaves a cell in a direction; [halt] ends the beam
+     in the cell it is in. *)
   let rec walk ~(first : bool) (p : pos) (d : dir) (c : color) : unit =
-    if Hashtbl.mem visited (p, d) then record_ending p d c Looped
-    else begin
-      Hashtbl.replace visited (p, d) ();
-      match if first then None else cell_at p with
-      | Some Wall -> halt p d c Hit_wall
-      | Some (Target _) ->
-          if not (Hashtbl.mem arrivals p) then Hashtbl.replace arrivals p c;
-          halt p d c Hit_target
-      | Some (Mirror o) -> emit p (reflect o d) c
-      | Some (Splitter o) ->
-          let reflected = reflect o d in
-          emit p d c;
-          (* Edge-on, the two ways out are the same way, so only one beam
-             leaves. *)
-          if reflected <> d then emit p reflected c
-      | Some (Source _) | None -> emit p d c
-    end
-  and emit (p : pos) (d : dir) (c : color) : unit =
-    record_segment p d c;
-    let next = step p d in
-    if in_bounds next then walk ~first:false next d c
-    else record_ending p d c Left_board
+    Hashtbl.replace visited (p, d) ();
+    match if first then None else cell_at p with
+    | Some Wall -> halt p d c Hit_wall
+    | Some (Target _) ->
+        let so_far = Hashtbl.find_opt arrivals p in
+        Hashtbl.replace arrivals p
+          (match so_far with None -> c | Some m -> mix m c);
+        emit p d d c
+    | Some (Mirror o) ->
+        let out = reflect o d in
+        (* Edge-on, the beam runs along the mirror's own line and stops. *)
+        if out = d then halt p d c Hit_mirror_edge else emit p d out c
+    | Some (Splitter o) ->
+        let reflected = reflect o d in
+        emit p d d c;
+        (* Edge-on, the two ways out are the same way, so only one beam
+           leaves. *)
+        if reflected <> d then emit p d reflected c
+    | Some (Source _) | None -> emit p d d c
+  and emit (p : pos) (entered : dir) (out : dir) (c : color) : unit =
+    record_segment p entered out c;
+    let next = step p out in
+    if not (in_bounds next) then record_ending p out c Left_board
+    else if Hashtbl.mem visited (next, out) then record_ending p out c Looped
+    else walk ~first:false next out c
   and halt (p : pos) (d : dir) (c : color) (reason : stop) : unit =
-    record_segment p d c;
+    record_segment p d d c;
     record_ending p d c reason
   in
   List.iter
@@ -132,3 +142,9 @@ let trace_grid ~(rows : int) ~(cols : int) ~(cell_at : pos -> piece option) :
     targets;
     all_lit = List.for_all (fun (p, _) -> lit p) targets;
   }
+
+let trace (b : Board.t) : result =
+  trace_grid ~rows:(Board.rows b) ~cols:(Board.cols b) ~cell_at:(fun p ->
+      match Board.get b p with
+      | Ok (Board.Fixed piece | Board.Placed piece) -> Some piece
+      | Ok Board.Empty | Error _ -> None)

@@ -1,33 +1,24 @@
 (** Following beams of light across a board.
 
     Every source emits a beam. A beam travels cell by cell in a straight line
-    until something changes it: a wall stops it, a target absorbs it, a mirror
-    turns it, a splitter turns it {i and} lets it carry on, and the edge of the
-    board ends it. A target is lit when a beam of exactly its color reaches it.
+    until something changes it: a wall stops it, a mirror turns it, a splitter
+    turns it {i and} lets it carry on, and the edge of the board ends it. A
+    target does not stop a beam; the beam passes through and keeps going.
 
-    {1 Why this takes a lookup function rather than a board}
+    {1 How to call it}
 
-    The shared contract (plan section 5.3) says [Tracer] publishes [trace] from
-    a board to a result. [Board] is stubbed on [main] — [Board.empty] raises —
-    so a tracer written against it would compile and be impossible to test.
-
-    So the tracing is published here as {!trace_grid}, which asks for the size
-    of the grid and a function saying what sits on each cell. When AKS-3 lands,
-    [trace] joins this interface as a wrapper:
-
-    {[
-    val trace : Board.t -> result
-    (* = trace_grid ~rows:(Board.rows b) ~cols:(Board.cols b)
-             ~cell_at:(fun p -> match Board.get b p with
-                                | Ok (Board.Fixed pc | Board.Placed pc) -> Some pc
-                                | _ -> None) *)
-    ]}
-
-    Keeping the split afterwards costs nothing and means the beam rules can be
-    tested against a grid written out as text, which is what
-    [test/test_tracer.ml] does.
+    {!trace} traces a {!Board.t}. It is a wrapper around {!trace_grid}, which
+    asks only for the size of the grid and a function saying what sits on each
+    cell. The rules below can therefore be tested against a grid written out as
+    text, without a working board, which is what [test/test_tracer.ml] does.
 
     {1 The beam rules}
+
+    These are decisions D21 and D22 in [docs/DECISIONS.md].
+
+    A beam's path starts on its source's own cell, travelling in the source's
+    direction. A source never acts on a beam: a beam that enters any source's
+    cell, its own included, passes straight through.
 
     A direction is reflected by mirroring it in the line the piece lies along:
 
@@ -39,47 +30,59 @@
     - [Backslash] ([\ ]) exchanges [N] with [W], [S] with [E], and [NE] with
       [SW].
 
-    A beam travelling {i along} the line a mirror lies on — [E] or [W] into a
-    [Horizontal] mirror, [NE] or [SW] into a [Slash] — is reflected onto itself,
-    so it carries straight on. This answers the question section 5.4 left open
-    about a beam meeting a mirror edge-on: it passes through. It is PROPOSED,
-    not ratified; the alternative is to absorb such a beam, which would make the
-    rule "a mirror sometimes blocks" and is harder to explain to a player.
+    Mirrors reflect from both faces. A beam that hits a mirror square-on (at
+    right angles to its line) is sent straight back. A beam travelling {i along}
+    the line a mirror lies on — [E] or [W] into a [Horizontal] mirror, [NE] or
+    [SW] into a [Slash] — meets it edge-on and stops in the mirror's cell.
 
-    A splitter sends the beam both ways: the reflected direction and the
-    original one. A beam arriving edge-on would give the same direction twice,
-    so only one beam continues.
+    A splitter sends one beam straight on and a second beam the way a mirror of
+    the same orientation would. Both keep the incoming color. Edge-on, the
+    second beam would stop at once, so only the straight beam leaves; square-on,
+    one beam goes straight on and one goes back.
 
-    Colors are carried unchanged. Prisms, filters and combiners, which change
-    them, are MS3.
+    Beams that cross each other do not interact. Colors are carried unchanged;
+    prisms, filters and combiners, which change them, are MS3.
 
-    A beam that returns to a cell it has already visited
-    {i travelling in the same direction} is in a loop and is stopped there.
-    Reaching the same cell in a different direction is ordinary and keeps going.
-*)
+    The color reaching a target is the mix of every beam that passes through it:
+    each of red, green and blue is on if it is on in any of those beams. A
+    target is lit when that mix equals its own color exactly, so a red and a
+    green beam together light a yellow target, but a stray green beam through a
+    red target leaves it dark.
+
+    A beam about to enter a cell it has already entered
+    {i travelling in the same direction} is in a loop and stops in the cell it
+    is in. Reaching the same cell in a different direction is ordinary and keeps
+    going. *)
 
 type segment = {
   at : Types.pos;  (** The cell the beam is passing through. *)
-  dir : Types.dir;  (** The direction it is travelling in as it leaves. *)
+  entered : Types.dir;
+      (** The direction it was travelling in as it came into the cell. On the
+          source's own cell this is the source's direction. *)
+  dir : Types.dir;
+      (** The direction it leaves the cell in. Different from [entered] where a
+          mirror or splitter turned it. In the cell where a beam stops, it is
+          the direction the beam was travelling in. *)
   color : Types.color;  (** Its color. *)
 }
 (** One cell of one beam's path. *)
 
 type ending = {
-  last : Types.pos;  (** The last cell the beam occupied. *)
-  heading : Types.dir;  (** The direction it was travelling in. *)
+  last : Types.pos;  (** The last cell of the beam's path. *)
+  heading : Types.dir;  (** The direction it was travelling in there. *)
   beam_color : Types.color;  (** Its color when it stopped. *)
   reason : stop;  (** Why it stopped there. *)
 }
-(** Where and why a beam stopped. The generator (SOH-3) builds levels by putting
-    targets where beams end, so it reads these. *)
+(** Where and why a beam stopped. Each branch a splitter makes has its own
+    ending. *)
 
 (** Why a beam stopped. *)
 and stop =
-  | Left_board  (** It ran off the edge. *)
-  | Hit_wall  (** A wall absorbed it. *)
-  | Hit_target  (** A target absorbed it, whether or not the color matched. *)
-  | Looped  (** It re-entered a cell travelling the same way as before. *)
+  | Left_board  (** The next cell would be off the board. *)
+  | Hit_wall  (** It entered a wall's cell. *)
+  | Hit_mirror_edge  (** It met a mirror edge-on, in that mirror's cell. *)
+  | Looped
+      (** The next cell is one it already entered travelling the same way. *)
 
 type result = {
   segments : segment list;
@@ -88,12 +91,11 @@ type result = {
           appears twice. *)
   endings : ending list;  (** Where each beam stopped. *)
   targets : (Types.pos * Types.color option) list;
-      (** Every target on the grid in reading order, each with the color that
-          reached it, or [None] if no beam did. A target reached by more than
-          one beam reports the first that arrived. *)
+      (** Every target on the grid in reading order, each with the mix of the
+          colors that reached it, or [None] if no beam did. *)
   all_lit : bool;
-      (** Whether every target was reached by a beam of exactly its own color. A
-          grid with no targets is [true]: nothing is unlit. *)
+      (** Whether every target is lit, as described above. A grid with no
+          targets is [true]: nothing is unlit. *)
 }
 (** What a trace found. *)
 
@@ -110,7 +112,8 @@ val trace_grid :
     their beams are traced in that order. [cell_at] is called many times for the
     same cell and must answer the same way each time.
 
-    A beam starts {i on} its source's cell travelling in the source's direction,
-    and the source itself does not reflect or absorb it.
-
     @raise Invalid_argument if [rows] or [cols] is less than one. *)
+
+val trace : Board.t -> result
+(** [trace b] is {!trace_grid} on [b]: its size, with each cell's fixed or
+    placed piece. *)
