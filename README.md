@@ -1,13 +1,11 @@
-# Team 64 LaserTracer
+# Lumen
 
+A light-beam puzzle game for the terminal, by **Team 64 LaserTracer**.
 CS 3110, Cornell University, Fall 2026.
-
-> **The game's own name is still TBD** (`Lumen` is the current candidate). Once
-> the team settles it, add it here and in `AUTHORS.md`.
 
 ## What this is
 
-A light-beam puzzle game for the terminal. Each level is a grid with light
+Lumen is a light-beam puzzle game for the terminal. Each level is a grid with light
 sources, walls, and colored targets. You get a small set of pieces — mirrors to
 turn a beam, splitters to send it two ways, prisms to split white light into red,
 green, and blue, filters to pass one color, combiners to mix them — and you place
@@ -111,17 +109,23 @@ input. They are never copied from what the code printed.
 - [AUTHORS.md](AUTHORS.md) — contributing authors, libraries, adapted sources,
   assets, and AI use. Required by the project handout and included in the MS2
   and MS3 submission ZIPs.
+- [Rules for coding agents](AGENTS.md) — what every teammate's coding agent
+  must follow: attribution, who decides what, pull requests, tests.
+- [MS2 plan](docs/MS2_PLAN.md) — scope, tasks, handoffs and reviewers for MS2.
+- [MS2 checklist](docs/MS2-CHECKLIST.md) — the 16 handoffs.
+- [Decisions](docs/DECISIONS.md) — what we decided, the alternatives, and why.
+- [AI log](docs/AI-LOG.md) — one row per pull request on how AI was used and
+  checked.
 
 ## Milestones
 
 | Milestone | Due | Weight | Deliverable |
 |---|---|---|---|
 | MS1 Startup | Wed Nov 4, 9:00 pm | 2% | `MS1Report.pdf` on Gradescope, 3-4 pages |
-| MS2 Work in Progress | see Canvas | 4% | `source.zip` + `MS2Report.pdf`, about 6 pages |
+| MS2 Work in Progress | Mon Nov 23, 9:00 pm | 4% | `source.zip` + `MS2Report.pdf`, about 6 pages |
 | MS3 Release | see Canvas | 8% | `source.zip` + `MS3Report.pdf` + `INSTALL.md` + video + `gallery.yaml` |
 
-Peer evaluations are a further 4%. Each milestone also has a **required meeting
-with a member of course staff**. Every report must begin with the team name,
+Peer evaluations are a further 4%. Every report must begin with the team name,
 members and NetIDs, project title, and a clickable URL for this repository.
 
 MS2 and MS3 are graded from the uploaded ZIP rather than from this repository,
