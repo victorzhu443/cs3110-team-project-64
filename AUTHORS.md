@@ -1,6 +1,6 @@
 # Authors
 
-**Team 64 LaserTracer** · CS 3110, Cornell University, Fall 2026
+**Lumen** · Team 64 LaserTracer · CS 3110, Cornell University, Fall 2026
 
 ## Contributing authors
 
@@ -52,9 +52,17 @@ milestone reports. Each of us remains responsible for the correctness of what we
 submit and must be able to explain how it works. Our team contract records how
 we disclose assisted work and who reviews it.
 
-Summarize AI use per component here as the project develops, so the milestone
-reports can draw on it.
+Summarize AI use per component here, from your rows in
+[docs/AI-LOG.md](docs/AI-LOG.md). **Fill in your own rows before Sat Nov 21.**
+Write "none" if you did not use AI for that component. "Who reviewed it" names
+the two pull-request reviewers.
 
 | Component | Member | How AI was used | Who reviewed it |
 |---|---|---|---|
-|  |  |  |  |
+| Board and level files | Akshay Joshi |  |  |
+| Beam tracer | Anvi Savant |  |  |
+| Solver | Victor Zhu |  |  |
+| Generator and test harness | Sohan Madishetty |  |  |
+| Game state and terminal UI | Alex Fisher |  |  |
+| Project documents and planning | Anvi Savant |  |  |
+| Repository and MS1 set-up | Victor Zhu |  |  |
