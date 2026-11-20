@@ -28,7 +28,7 @@ OPAM packages beyond the standard library, and why we chose each one.
 
 | Package | Used for | License |
 |---|---|---|
-|  |  |  |
+| `ounit2` | The automated test suite run by `dune test`. The course uses OUnit, and the team agreed on OUnit only (decision D12). | MIT |
 
 ### Adapted code and examples
 
