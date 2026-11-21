@@ -62,7 +62,7 @@ the two pull-request reviewers.
 | Board and level files | Akshay Joshi |  |  |
 | Beam tracer | Anvi Savant |  |  |
 | Solver | Victor Zhu |  |  |
-| Generator and test harness | Sohan Madishetty |  |  |
+| Generator and test harness | Sohan Madishetty | Claude Code wrote the generator, its seed tests and the shared test helpers, and drafted the pull request descriptions. Sohan read the code and ran `dune test`; the tests check properties from `generator.mli` over seeds 1 to 200 (D13). Rows for #3 and #9 in the AI log | Alex Fisher, Akshay Joshi |
 | Game state and terminal UI | Alex Fisher | | |
 | Project documents and planning | Anvi Savant |  |  |
 | Repository and MS1 set-up | Victor Zhu |  |  |
