@@ -1,9 +1,6 @@
 open Types
 
-type error =
-  | Invalid_size of int * int
-  | Gave_up of int
-  | Unreadable_text of Level.error
+type error = Invalid_size of int * int | Gave_up of int
 
 type construction = {
   rows : int;
@@ -24,8 +21,6 @@ let string_of_error = function
          between %d and %d."
         rows cols min_size max_size
   | Gave_up n -> Printf.sprintf "No valid level was found after %d tries." n
-  | Unreadable_text e ->
-      "The generated level could not be read back: " ^ Level.string_of_error e
 
 (* ---------- What a generated level is made of ---------- *)
 
@@ -275,7 +270,3 @@ let construct ~seed ~rows ~cols =
         | None -> loop (tries + 1)
     in
     loop 0
-
-let generate ~seed ~rows ~cols =
-  Result.bind (construct ~seed ~rows ~cols) (fun c ->
-      Result.map_error (fun e -> Unreadable_text e) (Level.of_string c.text))

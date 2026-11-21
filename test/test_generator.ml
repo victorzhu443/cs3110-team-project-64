@@ -269,54 +269,6 @@ let size_tests =
     "accepts a non-square board" >:: accepts_size ~seeds:(first 20) 5 9;
   ]
 
-(* ---------- generate, through the real Level and Board ---------- *)
-
-(* [Level] and [Board] are stubs that raise until AKS-3 and AKS-4 land. These
-   tests skip themselves until then, and run on their own once the real modules
-   are merged. *)
-let level_ready =
-  match Level.of_string "" with _ -> true | exception Failure _ -> false
-
-let board_ready =
-  match Board.empty 1 1 with _ -> true | exception Failure _ -> false
-
-let generate_ok ~seed ~rows ~cols =
-  match Generator.generate ~seed ~rows ~cols with
-  | Ok l -> l
-  | Error e -> assert_failure (say seed (Generator.string_of_error e))
-
-let generate_reads_back _ =
-  skip_if (not level_ready) "Level.of_string is still a stub (AKS-4)";
-  List.iter
-    (fun (seed, (c : Generator.construction)) ->
-      let l = generate_ok ~seed ~rows:6 ~cols:6 in
-      assert_equal ~msg:(say seed "pieces given") ~printer:(String.concat " ")
-        (List.map (fun (_, p) -> kind p) c.solution)
-        (List.map kind (Level.pieces l)))
-    (constructions 6 6)
-
-let generate_board_matches _ =
-  skip_if (not (level_ready && board_ready)) "Level or Board is still a stub";
-  List.iter
-    (fun (seed, (c : Generator.construction)) ->
-      let b = Level.board (generate_ok ~seed ~rows:6 ~cols:6) in
-      assert_equal ~msg:(say seed "rows") 6 (Board.rows b);
-      assert_equal ~msg:(say seed "cols") 6 (Board.cols b);
-      for row = 0 to 5 do
-        for col = 0 to 5 do
-          let p = { row; col } in
-          let expected =
-            match List.assoc_opt p c.fixed with
-            | None -> Ok Board.Empty
-            | Some piece -> Ok (Board.Fixed piece)
-          in
-          assert_bool
-            (say seed ("the cell at " ^ where p ^ " differs"))
-            (Board.get b p = expected)
-        done
-      done)
-    (constructions 6 6)
-
 (* ---------- The suite ---------- *)
 
 (* The seed properties run on 6x6 and 8x8, the sizes in Victor's timing
@@ -343,9 +295,6 @@ let suite =
        @ [
            "same seed gives the same level" >:: same_seed_same_level;
            "different seeds are used" >:: seeds_are_used;
-           "generate reads back the pieces" >:: generate_reads_back;
-           "generate's board matches the construction"
-           >:: generate_board_matches;
          ]
        @ size_tests
 

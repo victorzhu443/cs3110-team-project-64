@@ -11,9 +11,10 @@
 
     {!construct} builds the level as a list of pieces and as text in the level
     file format ([docs/LEVEL-FORMAT.md]), and traces it with
-    {!Tracer.trace_grid}. Only {!generate} turns it into a {!Level.t}, by
-    reading that text with {!Level.of_string}. So [construct] needs only the
-    tracer, and a generated level can also be saved as a [.lvl] file.
+    {!Tracer.trace_grid}, so it needs only the tracer. The text is what
+    {!Level.of_string} reads, and it can also be saved as a [.lvl] file. A
+    [generate] that returns a {!Level.t} by reading that text joins this
+    interface once [Level.of_string] is implemented (AKS-4).
 
     All randomness comes from the seed. The same seed and size always give the
     same level on the same OCaml version. Nothing here reads input or prints. *)
@@ -25,10 +26,6 @@ type error =
           {!max_size}. *)
   | Gave_up of int
       (** [Gave_up n]: [n] attempts were made and none passed every check. *)
-  | Unreadable_text of Level.error
-      (** Only from {!generate}: {!Level.of_string} refused the text that
-          {!construct} wrote. That is a bug in the generator, not in the caller.
-      *)
 
 type construction = {
   rows : int;  (** The number of rows. *)
@@ -76,13 +73,7 @@ val construct : seed:int -> rows:int -> cols:int -> (construction, error) result
 
     Errors: [Invalid_size (rows, cols)] if [rows] or [cols] is outside
     [min_size .. max_size]; [Gave_up max_attempts] if no candidate passed these
-    checks. Never [Unreadable_text]. *)
-
-val generate : seed:int -> rows:int -> cols:int -> (Level.t, error) result
-(** [generate ~seed ~rows ~cols] is [Level.of_string c.text] for the [c] that
-    [construct ~seed ~rows ~cols] gives: the level the game shows the player,
-    without the solution. Errors: as for {!construct}, and [Unreadable_text] if
-    {!Level.of_string} refuses the text. *)
+    checks. *)
 
 val string_of_error : error -> string
 (** [string_of_error e] is a sentence describing [e], suitable to show a player.
