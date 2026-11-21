@@ -38,6 +38,7 @@ the current record.
 | D22 | Tracer rules for paths, mirrors, sources, crossings and splitters. | DECIDED |
 | D23 | An agent may cross-check hand-worked expected answers after the human has written theirs. | DECIDED |
 | D24 | The terminal uses zero-based, row-first coordinates and counts each successful board edit as one move. | DECIDED |
+| D29 | The terminal uses a glyph per board cell and ANSI color, with a plain-text render option. | DECIDED |
 
 ## Decisions since Nov 17
 
@@ -136,6 +137,19 @@ ALX-2 clarifications from Alex on Nov 21:
   returns it in the orientation it had in the starting inventory.
 - Invalid commands prompt the player to type `help`. An empty inventory
   names the unavailable piece kind. Board errors keep the Board wording.
+
+### D29 — Board rendering (ALX-3)
+
+- **What:** The grid shows empty cells as dots, walls as hashes, sources as
+  `@`, dark targets as `o`, and lit targets as `*`. Mirrors use their
+  orientation symbols and splitters use distinct line glyphs. Beams follow
+  their axis and use `+` where different axes cross in an empty cell. A
+  piece stays visible when a beam passes through it. The inventory and
+  move count appear below the grid.
+- **Alternative considered:** Always include color escapes in the renderer.
+- **Why:** Plain output is readable in transcripts and can be compared by
+  tests. Color shows the light and target colors in the terminal.
+- **Who agreed:** Alex, the terminal UI owner, on Nov 21.
 
 ## Still open
 
