@@ -16,4 +16,6 @@
   test_generator
   test_game
   test_render)
+ (deps
+  (glob_files %{project_root}/levels/*.lvl))
  (libraries lumen ounit2))

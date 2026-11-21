@@ -87,3 +87,25 @@ Each problem gives its own `Level.error` value instead of crashing:
 | A letter with no legend line | `Undefined_letter` |
 | A legend line that doesn't match the forms above | `Bad_legend_line` (the line number) |
 | No source, or no target | `No_source`, `No_target` |
+
+## Tutorial 1 and its solution
+
+`levels/tutorial01.lvl` is the MS2 level (AKS-4). Other tests may rely on this
+solution:
+
+```
+      col 0123456
+    row 0 ......#      A = source E white
+    row 1 A......      a, b = target white
+    row 2 .......      pieces: splitter mirror
+    row 3 .#.....
+    row 4 ...a..#
+    row 5 .....b.
+```
+
+- Place a **splitter `\` at (1,3)** and a **mirror `\` at (1,5)**.
+- The beam runs east along row 1. The splitter sends it on east and turns a copy
+  south down column 3, through `a` at (4,3). The mirror turns the east beam
+  south down column 5, through `b` at (5,5). Both targets get white light.
+- With no pieces placed, the beam runs straight along row 1 and off the board,
+  so neither target is lit.
