@@ -39,6 +39,7 @@ the current record.
 | D23 | An agent may cross-check hand-worked expected answers after the human has written theirs. | DECIDED |
 | D24 | The terminal uses zero-based, row-first coordinates and counts each successful board edit as one move. | DECIDED |
 | D29 | The terminal uses a glyph per board cell and ANSI color, with a plain-text render option. | DECIDED |
+| D30 | The terminal takes a level path and ends the session on a win, quit, or end of input. | DECIDED |
 
 ## Decisions since Nov 17
 
@@ -149,6 +150,18 @@ ALX-2 clarifications from Alex on Nov 21:
 - **Alternative considered:** Always include color escapes in the renderer.
 - **Why:** Plain output is readable in transcripts and can be compared by
   tests. Color shows the light and target colors in the terminal.
+- **Who agreed:** Alex, the terminal UI owner, on Nov 21.
+
+### D30 — Terminal session (ALX-4)
+
+- **What:** The terminal takes a level file path and redraws the board as the
+  player enters commands. Invalid commands and rejected moves display the
+  existing Game error messages and leave the session running. The session
+  ends on `quit`, end of input, or a win. The win message is
+  `You solved the level!`. Set `NO_COLOR=1` for plain output.
+- **Alternative considered:** Keep accepting moves after a win.
+- **Why:** Ending at the win gives the tutorial a clear finish. Plain output
+  makes the play-through easy to capture and read.
 - **Who agreed:** Alex, the terminal UI owner, on Nov 21.
 
 ## Still open
