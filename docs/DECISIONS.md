@@ -129,6 +129,14 @@ Nov 18. They go into the `tracer.mli` comments.
   file coordinates. The orientation symbols match the level format.
 - **Who agreed:** Alex, the game and terminal UI owner, on Nov 20.
 
+ALX-2 clarifications from Alex on Nov 21:
+
+- Coordinates use nonnegative decimal integers.
+- Placement checks the board before checking inventory. Removing a piece
+  returns it in the orientation it had in the starting inventory.
+- Invalid commands prompt the player to type `help`. An empty inventory
+  names the unavailable piece kind. Board errors keep the Board wording.
+
 ## Still open
 
 | # | Question | Owner | Needed by |
