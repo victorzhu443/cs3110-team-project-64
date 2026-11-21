@@ -1,0 +1,13 @@
+name: Tutorial 1
+pieces: splitter mirror
+
+......#
+A......
+.......
+.#.....
+...a..#
+.....b.
+
+A = source E white
+a = target white
+b = target white

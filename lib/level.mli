@@ -15,6 +15,9 @@ type error =
       (** The file could not be opened or read. Holds the system's message. *)
   | Missing_name  (** There is no [name:] line. *)
   | Missing_pieces  (** There is no [pieces:] line. *)
+  | Duplicate_header of int
+      (** The [name:] or [pieces:] line on this line repeats one that came
+          before it. *)
   | Unknown_piece_name of string
       (** A word on the [pieces:] line is not [mirror] or [splitter]. *)
   | Empty_grid  (** The file has no grid. *)
@@ -25,7 +28,8 @@ type error =
   | Undefined_letter of char
       (** A letter used in the grid has no legend line. *)
   | Bad_legend_line of int
-      (** The legend line on this line is not in the form the format expects. *)
+      (** The legend line on this line is not in the form the format expects.
+          Any line containing [=] counts as a legend line. *)
   | No_source  (** The grid has no source. *)
   | No_target  (** The grid has no target. *)
 
