@@ -63,6 +63,6 @@ the two pull-request reviewers.
 | Beam tracer | Anvi Savant |  |  |
 | Solver | Victor Zhu |  |  |
 | Generator and test harness | Sohan Madishetty |  |  |
-| Game state and terminal UI | Alex Fisher |  |  |
+| Game state and terminal UI | Alex Fisher | | |
 | Project documents and planning | Anvi Savant |  |  |
 | Repository and MS1 set-up | Victor Zhu |  |  |

@@ -37,6 +37,7 @@ the current record.
 | D21 | Beams pass through targets; a target lights when the mix of every beam through it exactly equals its color. | DECIDED |
 | D22 | Tracer rules for paths, mirrors, sources, crossings and splitters. | DECIDED |
 | D23 | An agent may cross-check hand-worked expected answers after the human has written theirs. | DECIDED |
+| D24 | The terminal uses zero-based, row-first coordinates and counts each successful board edit as one move. | DECIDED |
 
 ## Decisions since Nov 17
 
@@ -116,6 +117,18 @@ Nov 18. They go into the `tracer.mli` comments.
   implementation deciding what is "right".
 - **Who agreed:** the team, Nov 18.
 
+### D24 — Terminal commands (ALX-1)
+
+- **What:** `place ROW COL PIECE ORIENTATION`, `rotate ROW COL`,
+  `remove ROW COL`, `help`, and `quit`. Coordinates are zero-based and
+  row-first. Piece names are `mirror` and `splitter`. Orientations use the
+  symbols shown in the README. Every successful board edit counts as one
+  move. The executable handles help and quit.
+- **Alternative considered:** one-based player coordinates.
+- **Why:** zero-based, row-first coordinates match `Types.pos` and the level
+  file coordinates. The orientation symbols match the level format.
+- **Who agreed:** Alex, the game and terminal UI owner, on Nov 20.
+
 ## Still open
 
 | # | Question | Owner | Needed by |
@@ -131,5 +144,5 @@ Nov 18. They go into the `tracer.mli` comments.
 
 Rule details each owner proposes in their `.mli` and records here (plan
 section 5.4): which pieces rotate and through how many orientations (Akshay);
-placing a piece in a source's first cell (Akshay); the typed command words
-(Alex); the level file characters (Akshay).
+placing a piece in a source's first cell (Akshay); the level file characters
+(Akshay).

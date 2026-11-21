@@ -99,6 +99,24 @@ several files are in `test/test_util.ml`. Expected answers are worked out by
 hand from a drawing of the board, or are properties that must hold for every
 input. They are never copied from what the code printed.
 
+## Planned player commands
+
+The terminal game will accept one command per line. Use zero-based coordinates,
+with the row first. The top-left cell is row 0, column 0.
+
+| Command | Action |
+|---|---|
+| `place ROW COL PIECE ORIENTATION` | Place a `mirror` or `splitter` in an empty cell. |
+| `rotate ROW COL` | Turn a placed piece 45 degrees clockwise. |
+| `remove ROW COL` | Take a placed piece off the board and return it to your inventory. |
+| `help` | Show the available commands. |
+| `quit` | Exit the game. |
+
+Use `-` for horizontal, `/` for slash, `|` for vertical, and `\` for
+backslash. For example, `place 1 2 mirror /` places a slash mirror in the
+second row and third column. Each successful placement, rotation, or removal
+counts as one move.
+
 ## Documents
 
 - [Team contract](docs/TEAM-CONTRACT.md) — how we work together, plus the
