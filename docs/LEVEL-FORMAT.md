@@ -25,7 +25,8 @@ b = target white
 
 ## Header
 
-Two lines, in either order, before the grid:
+Two lines, in either order, before the grid. Each appears exactly once; a
+repeated `name:` or `pieces:` line is an error.
 
 - `name: <text>` is the level's name. Everything after `name:` is kept, with
   spaces at the ends trimmed.
@@ -52,7 +53,9 @@ A grid must contain at least one source and one target.
 
 ## Legend
 
-One line for each letter used in the grid:
+The legend starts at the first line containing `=` (no grid character is `=`),
+and every line after that must be a legend line. One line for each letter used
+in the grid:
 
 - `<Uppercase letter> = source <direction> <color>`, for example `A = source E white`
 - `<lowercase letter> = target <color>`, for example `a = target red`
@@ -80,6 +83,7 @@ Each problem gives its own `Level.error` value instead of crashing:
 | The file can't be read | `File_error` |
 | No `name:` line | `Missing_name` |
 | No `pieces:` line | `Missing_pieces` |
+| A second `name:` or `pieces:` line | `Duplicate_header` (the line number) |
 | A word other than `mirror` or `splitter` on the `pieces:` line | `Unknown_piece_name` |
 | No grid | `Empty_grid` |
 | A row of a different width | `Ragged_grid` (the line number) |

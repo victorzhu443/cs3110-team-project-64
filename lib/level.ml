@@ -6,6 +6,7 @@ type error =
   | File_error of string
   | Missing_name
   | Missing_pieces
+  | Duplicate_header of int
   | Unknown_piece_name of string
   | Empty_grid
   | Ragged_grid of int
@@ -19,6 +20,8 @@ let string_of_error = function
   | File_error msg -> "The level file could not be read: " ^ msg
   | Missing_name -> "The level has no \"name:\" line."
   | Missing_pieces -> "The level has no \"pieces:\" line."
+  | Duplicate_header n ->
+      Printf.sprintf "Line %d repeats a \"name:\" or \"pieces:\" line." n
   | Unknown_piece_name w ->
       Printf.sprintf
         "\"%s\" on the \"pieces:\" line is not \"mirror\" or \"splitter\"." w
@@ -49,8 +52,12 @@ let after prefix s =
     (String.sub s (String.length prefix)
        (String.length s - String.length prefix))
 
-(* A legend line looks like "X = ...". *)
+(* A well-formed legend line looks like "X = ...". *)
 let is_legend_line s = String.length s >= 4 && String.sub s 1 3 = " = "
+
+(* No grid character is [=], so any line containing one is meant as a legend
+   line, even a malformed one like "A= source E red". *)
+let starts_legend s = String.contains s '='
 
 type parts = {
   name_line : string option;
@@ -60,8 +67,10 @@ type parts = {
 }
 
 (* Reads the non-blank lines in order: header lines first, then grid rows, then
-   legend lines. Once the grid starts, a header line is just a bad grid row;
-   once the legend starts, anything else is a bad legend line. *)
+   legend lines. Each header line may appear once. The first line containing
+   [=] starts the legend, and every line after it belongs to the legend, so a
+   stray grid row there is a bad legend line. Once the grid starts, a header
+   line is just a bad grid row. *)
 let split_parts text =
   let lines =
     List.mapi
@@ -70,20 +79,17 @@ let split_parts text =
     |> List.filter (fun (_, l) -> l <> "")
   in
   let rec header acc = function
-    | (_, l) :: rest when starts_with "name:" l ->
-        header { acc with name_line = Some (after "name:" l) } rest
-    | (_, l) :: rest when starts_with "pieces:" l ->
-        header { acc with pieces_line = Some (after "pieces:" l) } rest
+    | (n, l) :: rest when starts_with "name:" l ->
+        if acc.name_line <> None then Error (Duplicate_header n)
+        else header { acc with name_line = Some (after "name:" l) } rest
+    | (n, l) :: rest when starts_with "pieces:" l ->
+        if acc.pieces_line <> None then Error (Duplicate_header n)
+        else header { acc with pieces_line = Some (after "pieces:" l) } rest
     | lines -> grid acc lines
   and grid acc = function
-    | (_, l) :: _ as lines when is_legend_line l -> legend acc lines
+    | (_, l) :: _ as lines when starts_legend l ->
+        Ok { acc with legend = lines }
     | row :: rest -> grid { acc with grid = acc.grid @ [ row ] } rest
-    | [] -> Ok acc
-  and legend acc = function
-    | ((n, l) as line) :: rest ->
-        if is_legend_line l then
-          legend { acc with legend = acc.legend @ [ line ] } rest
-        else Error (Bad_legend_line n)
     | [] -> Ok acc
   in
   header { name_line = None; pieces_line = None; grid = []; legend = [] } lines
@@ -113,24 +119,26 @@ let find_by_name to_string values word =
 (* "A = source E white" or "a = target red". The letter's case must match the
    kind of piece. *)
 let parse_legend_line (n, l) =
-  let letter = l.[0] in
-  let words =
-    List.filter (( <> ) "") (String.split_on_char ' ' (after "X =" l))
-  in
   let bad = Error (Bad_legend_line n) in
-  match words with
-  | [ "source"; d; c ] when 'A' <= letter && letter <= 'Z' -> (
-      match
-        ( find_by_name string_of_dir all_dirs d,
-          find_by_name string_of_color all_colors c )
-      with
-      | Some d, Some c -> Ok (letter, Source (d, c))
-      | _ -> bad)
-  | [ "target"; c ] when 'a' <= letter && letter <= 'z' -> (
-      match find_by_name string_of_color all_colors c with
-      | Some c -> Ok (letter, Target c)
-      | None -> bad)
-  | _ -> bad
+  if not (is_legend_line l) then bad
+  else
+    let letter = l.[0] in
+    let words =
+      List.filter (( <> ) "") (String.split_on_char ' ' (after "X =" l))
+    in
+    match words with
+    | [ "source"; d; c ] when 'A' <= letter && letter <= 'Z' -> (
+        match
+          ( find_by_name string_of_dir all_dirs d,
+            find_by_name string_of_color all_colors c )
+        with
+        | Some d, Some c -> Ok (letter, Source (d, c))
+        | _ -> bad)
+    | [ "target"; c ] when 'a' <= letter && letter <= 'z' -> (
+        match find_by_name string_of_color all_colors c with
+        | Some c -> Ok (letter, Target c)
+        | None -> bad)
+    | _ -> bad
 
 (* Every legend line, with no letter defined twice. *)
 let parse_legend lines =

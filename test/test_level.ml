@@ -159,6 +159,37 @@ let reading_tests =
       assert_equal [ (pos 0 0, N, blue) ] (Board.sources (Level.board l)) );
   ]
 
+(* ---------- Levels from Sohan's generator ---------- *)
+
+(* The generator promises its text follows docs/LEVEL-FORMAT.md, so every
+   generated level should load, with the same fixed pieces it was built from. *)
+let generator_tests =
+  [
+    ( "generated levels load with the pieces they were built from" >:: fun _ ->
+      List.iter
+        (fun seed ->
+          match Generator.construct ~seed ~rows:6 ~cols:6 with
+          | Error e -> assert_failure (Generator.string_of_error e)
+          | Ok c ->
+              let l =
+                assert_ok
+                  ~msg:(Printf.sprintf "seed %d did not load" seed)
+                  (Level.of_string c.text)
+              in
+              let fixed =
+                List.filter_map
+                  (fun (p, _) ->
+                    match Board.get (Level.board l) p with
+                    | Ok (Board.Fixed got) -> Some (p, got)
+                    | _ -> None)
+                  c.fixed
+              in
+              assert_equal
+                ~msg:(Printf.sprintf "seed %d fixed pieces" seed)
+                c.fixed fixed)
+        (List.init 50 (fun i -> i + 1)) );
+  ]
+
 (* ---------- Each bad file gives its own error ---------- *)
 
 let error_tests =
@@ -169,6 +200,28 @@ let error_tests =
     ( "no pieces: line" >:: fun _ ->
       assert_level_error Level.Missing_pieces
         "name: X\nAa\nA = source E red\na = target red" );
+    ( "a second name: line" >:: fun _ ->
+      (* Line 1 name, line 2 pieces, line 3 the repeated name. *)
+      assert_level_error (Level.Duplicate_header 3)
+        "name: First\n\
+         pieces: mirror\n\
+         name: Second\n\
+         Aa\n\
+         A = source E red\n\
+         a = target red" );
+    ( "a second pieces: line" >:: fun _ ->
+      assert_level_error (Level.Duplicate_header 2)
+        "pieces: mirror\n\
+         pieces: splitter\n\
+         name: X\n\
+         Aa\n\
+         A = source E red\n\
+         a = target red" );
+    ( "a malformed first legend line is a bad legend line, not a ragged row"
+    >:: fun _ ->
+      (* Line 1 name, line 2 pieces, line 3 grid, line 4 "A= ..." (no space). *)
+      assert_level_error (Level.Bad_legend_line 4)
+        "name: X\npieces:\nAa\nA= source E red\na = target red" );
     ( "unknown piece name" >:: fun _ ->
       assert_level_error (Level.Unknown_piece_name "prism")
         "name: X\npieces: mirror prism\nAa\nA = source E red\na = target red" );
@@ -221,6 +274,7 @@ let error_tests =
   ]
 
 let suite =
-  "test suite for level" >::: tutorial_tests @ reading_tests @ error_tests
+  "test suite for level"
+  >::: tutorial_tests @ reading_tests @ generator_tests @ error_tests
 
 let () = run_test_tt_main suite
