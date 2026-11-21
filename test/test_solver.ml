@@ -4,10 +4,9 @@
     expected answer here follows from the rules of the search itself rather than
     from a drawing of a level. Each case says how it was worked out.
 
-    What is {i not} tested here, because it needs modules that are not on [main]
-    yet: that a real level has a real solution, and that applying a solution and
-    tracing it reports every target lit. That is VIC-4, and it arrives with
-    [Board] (AKS-3) and [Tracer] (ANV-7). *)
+    The second half (VIC-4) tests {!Lumen.Solver.solve} on real levels. A
+    solution is never compared with a stored answer: it is applied to the board
+    and traced, and the test checks that every target is lit (D13). *)
 
 open OUnit2
 open Lumen
@@ -195,7 +194,113 @@ let pruning_tests =
         [ 0; 1 ] (List.rev !seen) );
   ]
 
+(* ----- solve, on real levels (VIC-4) --------------------------------- *)
+
+(* The tutorial is levels/tutorial01.lvl, drawn in test_level.ml: a white source
+   at (1,0) facing east, white targets at (4,3) and (5,5), three walls, and a
+   splitter and a mirror to place. [dune test] runs in _build/default/test and
+   the levels folder is copied next to it. *)
+let tutorial_path = "../levels/tutorial01.lvl"
+
+let tutorial () =
+  Test_util.assert_ok ~msg:"tutorial01.lvl should load"
+    (Level.load tutorial_path)
+
+let level text =
+  Test_util.assert_ok ~msg:"the level text should parse" (Level.of_string text)
+
+(* One row, three cells: a red source facing east, an empty cell, a blue
+   target. Whatever the one mirror does on the middle cell, the target gets red
+   light or none, never blue, so there is no solution.
+
+       A.b      A = source E red, b = target blue, pieces: mirror *)
+let red_to_blue =
+  "name: Red to blue\npieces: mirror\nA.b\nA = source E red\nb = target blue"
+
+(* The same row with a red target and nothing to place: the beam already
+   lights it, so placing nothing is the solution. *)
+let already_lit =
+  "name: Already lit\npieces:\nA.a\nA = source E red\na = target red"
+
+(* The blue target again, but with nothing to place: no solution. *)
+let nothing_to_place =
+  "name: Nothing to place\npieces:\nA.b\nA = source E red\nb = target blue"
+
+(* [kind piece] forgets the orientation, so a solution's pieces can be compared
+   with the level's, which are all Horizontal until placed. *)
+let kind = function
+  | Mirror _ -> "mirror"
+  | Splitter _ -> "splitter"
+  | Source _ -> "source"
+  | Wall -> "wall"
+  | Target _ -> "target"
+
+let solve_tutorial () =
+  let l = tutorial () in
+  let b = Level.board l in
+  match Solver.solve b (Level.pieces l) with
+  | Some ps -> (l, b, ps)
+  | None -> assert_failure "the tutorial should have a solution"
+
+let solve_tests =
+  [
+    ( "the tutorial has a solution, and applying it lights every target"
+    >:: fun _ ->
+      let _, b, ps = solve_tutorial () in
+      let b' =
+        Test_util.assert_ok ~msg:"the solution should apply" (Solver.apply b ps)
+      in
+      assert_bool "not every target is lit" (Tracer.trace b').all_lit );
+    ( "the tutorial's solution uses exactly the pieces the level gives"
+    >:: fun _ ->
+      let l, _, ps = solve_tutorial () in
+      let kinds pieces = List.sort compare (List.map kind pieces) in
+      assert_equal ~printer:(String.concat " ")
+        (kinds (Level.pieces l))
+        (kinds (List.map (fun (q : Solver.placement) -> q.piece) ps)) );
+    ( "the tutorial's solution goes only on cells that were empty" >:: fun _ ->
+      let _, b, ps = solve_tutorial () in
+      let empty = Board.empty_cells b in
+      List.iter
+        (fun (q : Solver.placement) ->
+          assert_bool
+            (Printf.sprintf "(%d,%d) was not empty" q.at.row q.at.col)
+            (List.mem q.at empty))
+        ps );
+    ( "a red source cannot light a blue target, whatever one mirror does"
+    >:: fun _ ->
+      let l = level red_to_blue in
+      assert_equal ~printer:printer_placements None
+        (Solver.solve (Level.board l) (Level.pieces l)) );
+    ( "a level whose targets are already lit is solved by placing nothing"
+    >:: fun _ ->
+      let l = level already_lit in
+      assert_equal ~printer:printer_placements (Some [])
+        (Solver.solve (Level.board l) (Level.pieces l)) );
+    ( "a dark target and nothing to place has no solution" >:: fun _ ->
+      let l = level nothing_to_place in
+      assert_equal ~printer:printer_placements None
+        (Solver.solve (Level.board l) (Level.pieces l)) );
+    ( "apply refuses a second placement on the same cell" >:: fun _ ->
+      let b = Level.board (tutorial ()) in
+      let twice =
+        [
+          { Solver.piece = Splitter Backslash; at = p 1 3 };
+          { Solver.piece = Mirror Backslash; at = p 1 3 };
+        ]
+      in
+      assert_equal ~printer:Board.string_of_error
+        (Board.Occupied (p 1 3))
+        (Test_util.assert_error (Solver.apply b twice)) );
+    ( "apply leaves the board it was given unchanged" >:: fun _ ->
+      let b = Level.board (tutorial ()) in
+      ignore
+        (Solver.apply b [ { Solver.piece = Mirror Backslash; at = p 1 5 } ]);
+      assert_equal [] (Board.placed b) );
+  ]
+
 let tests =
-  "test suite for solver" >::: rotation_tests @ search_tests @ pruning_tests
+  "test suite for solver"
+  >::: rotation_tests @ search_tests @ pruning_tests @ solve_tests
 
 let _ = run_test_tt_main tests

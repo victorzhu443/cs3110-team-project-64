@@ -4,30 +4,19 @@
     a piece may occupy and the pieces available, it looks for an assignment that
     solves the level, and reports one if it finds it.
 
-    {1 Why this interface has a hole in it}
+    {1 How the pieces fit}
 
     The shared contract (plan section 5.3) says [Solver] publishes "[solve] from
-    a board and the pieces available to an optional list of placements". That
-    signature needs [Board.t] and [Tracer.trace], neither of which exists yet.
+    a board and the pieces available to an optional list of placements". That is
+    {!solve}: it puts the pieces on the board with {!apply} and asks
+    {!Tracer.trace} whether every target is lit.
 
-    So the search itself is published here as {!search}, which takes the two
-    things it actually needs from those modules as arguments: the list of cells
-    it may use, and a predicate that says whether a set of placements solves the
-    level. Nothing in this module knows what a board is or how light travels.
-
-    When [Board] and [Tracer] land, [solve] joins this interface as a short
-    wrapper:
-
-    {[
-    val solve : Board.t -> Types.piece list -> placement list option
-    (* = search ~slots:(Board.empty_cells b) ~pieces
-             ~solved:(fun ps -> (Tracer.trace (apply b ps)).all_lit) *)
-    ]}
-
-    This split is PROPOSED, not ratified: it is a design detail of the kind
-    section 5.4 leaves to the owner, and it is worth keeping afterwards, because
-    the search can then be tested without a board or a tracer at all — as
-    [test/test_solver.ml] does.
+    The search underneath is published on its own as {!search}. It takes the two
+    things it needs from [Board] and [Tracer] as arguments, the cells it may use
+    and a predicate saying whether a set of placements solves the level, and
+    knows nothing about boards or light. That split is kept because the search
+    can then be tested without a board or a tracer, as the first half of
+    [test/test_solver.ml] does; the second half tests {!solve} on real levels.
 
     {1 What the search guarantees}
 
@@ -96,3 +85,25 @@ val search :
     practice on 6x6 and 8x8 boards.
 
     @raise Invalid_argument if [slots] holds a repeated position. *)
+
+val apply : Board.t -> placement list -> (Board.t, Board.error) result
+(** [apply b ps] is [b] with every placement of [ps] made, in order, with
+    {!Board.place}. [b] itself is unchanged. Errors are {!Board.place}'s, for
+    the first placement that fails: [Out_of_bounds]; [Occupied] if the cell
+    holds a piece or an earlier placement already took it; [Not_placeable] if
+    the piece is not a mirror or a splitter. *)
+
+val solve : Board.t -> Types.piece list -> placement list option
+(** [solve b pieces] is [Some ps] where [apply b ps] succeeds and every target
+    of the resulting board is lit, as {!Tracer.trace} reports it, or [None] if
+    no way of placing [pieces] on the empty cells of [b] does that.
+
+    It is {!search} over [Board.empty_cells b] with the default [?candidates],
+    so it is exhaustive, deterministic, and returns the placements in the order
+    of [pieces], each in the orientation it must be placed in. A board whose
+    targets are all lit before anything is placed is solved by [pieces = []],
+    giving [Some []]. A piece that {!Board.place} refuses (a source, a wall or a
+    target) can never be placed, so the answer is then [None].
+
+    Cost is {!search}'s: the tutorial level, with 36 empty cells and a splitter
+    and a mirror to place, is at most 36 × 35 × 16 traces, about 20 000. *)
