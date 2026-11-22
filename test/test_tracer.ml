@@ -288,5 +288,235 @@ let beam_tests =
           Tracer.trace_grid ~rows:0 ~cols:3 ~cell_at:(fun _ -> None)) );
   ]
 
-let tests = "test suite for tracer" >::: reflect_tests @ beam_tests
+(* ----- the hand-worked boards (ANV-6) -------------------------------- *)
+
+(* Every board here is drawn, and its answer worked out by hand, in
+   docs/tracer-cases/README.md; the expected values are copied from there.
+   A path cell is written "(row,col) DIR color", or "(row,col) IN>OUT color"
+   where a mirror or splitter turns the beam. Beams are listed in the order
+   their sources are found, reading row by row. *)
+
+let blue = { r = false; g = false; b = true }
+let pos = Test_util.pos
+
+(** [path_of r] is every segment of [r] in the notation above, in trace order.
+*)
+let path_of (r : Tracer.result) : string list =
+  List.map
+    (fun (s : Tracer.segment) ->
+      let way =
+        if s.entered = s.dir then string_of_dir s.dir
+        else string_of_dir s.entered ^ ">" ^ string_of_dir s.dir
+      in
+      Printf.sprintf "%s %s %s" (string_of_pos s.at) way
+        (string_of_color s.color))
+    r.segments
+
+(** [targets_of r] is each target as "(row,col) color", or "(row,col) none" if
+    no beam reached it. *)
+let targets_of (r : Tracer.result) : string list =
+  List.map
+    (fun (p, c) ->
+      string_of_pos p ^ " "
+      ^ match c with Some c -> string_of_color c | None -> "none")
+    r.targets
+
+(** [board_test name (rows, cols, pieces) ~path ~endings ~targets ~all_lit]
+    traces the board and checks all four parts of the hand-worked answer. With
+    [~any_order:true], the path and the endings are compared without regard to
+    order, for a splitter, whose two branches the interface does not order. *)
+let board_test ?(any_order = false) name (rows, cols, pieces) ~path ~endings
+    ~targets ~all_lit =
+  name >:: fun _ ->
+  let r = trace_pieces rows cols pieces in
+  let order l = if any_order then List.sort compare l else l in
+  assert_equal ~msg:"path" ~printer:printer_strings (order path)
+    (order (path_of r));
+  assert_equal ~msg:"endings" ~printer:printer_strings (order endings)
+    (order (endings_of r));
+  assert_equal ~msg:"targets" ~printer:printer_strings targets (targets_of r);
+  assert_equal ~msg:"all lit" ~printer:string_of_bool all_lit r.all_lit
+
+(** The 3 by 3 board of boards 3 and 4: a mirror at (1,1) and one source. *)
+let mirror_board o source = (3, 3, [ (pos 1 1, Mirror o); source ])
+
+let hand_worked_tests =
+  [
+    board_test "board 1: a beam leaves the board"
+      (4, 5, [ (pos 2 1, Source (E, red)) ])
+      ~path:[ "(2,1) E red"; "(2,2) E red"; "(2,3) E red"; "(2,4) E red" ]
+      ~endings:[ "(2,4) E left" ] ~targets:[] ~all_lit:true;
+    board_test "board 2: a wall stops the beam in its own cell"
+      (3, 5, [ (pos 1 0, Source (E, green)); (pos 1 3, Wall) ])
+      ~path:
+        [ "(1,0) E green"; "(1,1) E green"; "(1,2) E green"; "(1,3) E green" ]
+      ~endings:[ "(1,3) E wall" ] ~targets:[] ~all_lit:true;
+    board_test "board 3a: east into / turns north"
+      (mirror_board Slash (pos 1 0, Source (E, red)))
+      ~path:[ "(1,0) E red"; "(1,1) E>N red"; "(0,1) N red" ]
+      ~endings:[ "(0,1) N left" ] ~targets:[] ~all_lit:true;
+    board_test "board 3b: west into / turns south"
+      (mirror_board Slash (pos 1 2, Source (W, green)))
+      ~path:[ "(1,2) W green"; "(1,1) W>S green"; "(2,1) S green" ]
+      ~endings:[ "(2,1) S left" ] ~targets:[] ~all_lit:true;
+    board_test "board 3c: south into / turns west"
+      (mirror_board Slash (pos 0 1, Source (S, blue)))
+      ~path:[ "(0,1) S blue"; "(1,1) S>W blue"; "(1,0) W blue" ]
+      ~endings:[ "(1,0) W left" ] ~targets:[] ~all_lit:true;
+    board_test "board 3d: north into / turns east"
+      (mirror_board Slash (pos 2 1, Source (N, red)))
+      ~path:[ "(2,1) N red"; "(1,1) N>E red"; "(1,2) E red" ]
+      ~endings:[ "(1,2) E left" ] ~targets:[] ~all_lit:true;
+    board_test "board 4a: east into \\ turns south"
+      (mirror_board Backslash (pos 1 0, Source (E, blue)))
+      ~path:[ "(1,0) E blue"; "(1,1) E>S blue"; "(2,1) S blue" ]
+      ~endings:[ "(2,1) S left" ] ~targets:[] ~all_lit:true;
+    board_test "board 4b: south into \\ turns east"
+      (mirror_board Backslash (pos 0 1, Source (S, green)))
+      ~path:[ "(0,1) S green"; "(1,1) S>E green"; "(1,2) E green" ]
+      ~endings:[ "(1,2) E left" ] ~targets:[] ~all_lit:true;
+    board_test "board 5: edge-on stops; square-on comes back through its source"
+      ( 5,
+        5,
+        [
+          (pos 1 0, Source (E, red));
+          (pos 1 2, Mirror Horizontal);
+          (pos 3 1, Source (E, green));
+          (pos 3 3, Mirror Vertical);
+        ] )
+      ~path:
+        [
+          "(1,0) E red";
+          "(1,1) E red";
+          "(1,2) E red";
+          "(3,1) E green";
+          "(3,2) E green";
+          "(3,3) E>W green";
+          "(3,2) W green";
+          "(3,1) W green";
+          "(3,0) W green";
+        ]
+      ~endings:[ "(1,2) E edge"; "(3,0) W left" ]
+      ~targets:[] ~all_lit:true;
+    board_test
+      "board 6: a target of the beam's color lights, and the beam goes on"
+      (3, 4, [ (pos 1 0, Source (E, blue)); (pos 1 2, Target blue) ])
+      ~path:[ "(1,0) E blue"; "(1,1) E blue"; "(1,2) E blue"; "(1,3) E blue" ]
+      ~endings:[ "(1,3) E left" ] ~targets:[ "(1,2) blue" ] ~all_lit:true;
+    board_test "board 7: a target of another color stays dark"
+      (3, 4, [ (pos 1 0, Source (E, red)); (pos 1 2, Target green) ])
+      ~path:[ "(1,0) E red"; "(1,1) E red"; "(1,2) E red"; "(1,3) E red" ]
+      ~endings:[ "(1,3) E left" ] ~targets:[ "(1,2) red" ] ~all_lit:false;
+    board_test "board 8: through one target to a second"
+      ( 3,
+        5,
+        [
+          (pos 1 0, Source (E, green));
+          (pos 1 2, Target green);
+          (pos 1 4, Target green);
+        ] )
+      ~path:
+        [
+          "(1,0) E green";
+          "(1,1) E green";
+          "(1,2) E green";
+          "(1,3) E green";
+          "(1,4) E green";
+        ]
+      ~endings:[ "(1,4) E left" ]
+      ~targets:[ "(1,2) green"; "(1,4) green" ]
+      ~all_lit:true;
+    board_test "board 9: red and green mix to light a yellow target"
+      ( 4,
+        4,
+        [
+          (pos 0 2, Source (S, red));
+          (pos 2 0, Source (E, green));
+          (pos 2 2, Target yellow);
+        ] )
+      ~path:
+        [
+          "(0,2) S red";
+          "(1,2) S red";
+          "(2,2) S red";
+          "(3,2) S red";
+          "(2,0) E green";
+          "(2,1) E green";
+          "(2,2) E green";
+          "(2,3) E green";
+        ]
+      ~endings:[ "(3,2) S left"; "(2,3) E left" ]
+      ~targets:[ "(2,2) yellow" ] ~all_lit:true;
+    board_test "board 10: a beam passes through another source's cell"
+      (* B at (2,0) comes before A at (2,2) in reading order. *)
+      ( 4,
+        4,
+        [
+          (pos 2 0, Source (E, green));
+          (pos 2 2, Source (S, red));
+          (pos 3 2, Target red);
+        ] )
+      ~path:
+        [
+          "(2,0) E green";
+          "(2,1) E green";
+          "(2,2) E green";
+          "(2,3) E green";
+          "(2,2) S red";
+          "(3,2) S red";
+        ]
+      ~endings:[ "(2,3) E left"; "(3,2) S left" ]
+      ~targets:[ "(3,2) red" ] ~all_lit:true;
+    board_test ~any_order:true "board 11: a splitter sends the beam on and up"
+      (3, 5, [ (pos 1 0, Source (E, red)); (pos 1 2, Splitter Slash) ])
+      ~path:
+        [
+          "(1,0) E red";
+          "(1,1) E red";
+          "(1,2) E red";
+          "(1,3) E red";
+          "(1,4) E red";
+          "(1,2) E>N red";
+          "(0,2) N red";
+        ]
+      ~endings:[ "(1,4) E left"; "(0,2) N left" ]
+      ~targets:[] ~all_lit:true;
+    board_test "board 12: four mirrors make a loop"
+      ( 5,
+        5,
+        [
+          (pos 1 1, Mirror Slash);
+          (pos 1 2, Source (E, blue));
+          (pos 1 3, Mirror Backslash);
+          (pos 3 1, Mirror Backslash);
+          (pos 3 3, Mirror Slash);
+        ] )
+      ~path:
+        [
+          "(1,2) E blue";
+          "(1,3) E>S blue";
+          "(2,3) S blue";
+          "(3,3) S>W blue";
+          "(3,2) W blue";
+          "(3,1) W>N blue";
+          "(2,1) N blue";
+          "(1,1) N>E blue";
+        ]
+      ~endings:[ "(1,1) E loop" ] ~targets:[] ~all_lit:true;
+    board_test "board 13: a diagonal beam off a - mirror"
+      (4, 5, [ (pos 0 0, Source (SE, blue)); (pos 2 2, Mirror Horizontal) ])
+      ~path:
+        [
+          "(0,0) SE blue";
+          "(1,1) SE blue";
+          "(2,2) SE>NE blue";
+          "(1,3) NE blue";
+          "(0,4) NE blue";
+        ]
+      ~endings:[ "(0,4) NE left" ] ~targets:[] ~all_lit:true;
+  ]
+
+let tests =
+  "test suite for tracer" >::: reflect_tests @ beam_tests @ hand_worked_tests
+
 let _ = run_test_tt_main tests
