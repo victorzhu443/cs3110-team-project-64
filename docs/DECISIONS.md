@@ -208,6 +208,10 @@ ALX-2 clarifications from Alex on Nov 21:
   tests. Color shows the light and target colors in the terminal.
 - **Who agreed:** Alex, the terminal UI owner, on Nov 21.
 
+Review follow-up on PR #19: Alex approved dashed beam glyphs
+(`┄`, `┆`, `⋰`, `⋱`) so they remain distinct from pieces in plain text.
+The renderer uses the basic eight ANSI colors for terminal compatibility.
+
 ### D30 — Terminal session (ALX-4)
 
 - **What:** The terminal takes a level file path and redraws the board as the
@@ -219,6 +223,9 @@ ALX-2 clarifications from Alex on Nov 21:
 - **Why:** Ending at the win gives the tutorial a clear finish. Plain output
   makes the play-through easy to capture and read.
 - **Who agreed:** Alex, the terminal UI owner, on Nov 21.
+
+Review follow-up on PR #21: When the inventory is empty and a placed piece
+can be removed, an unsolved game tells the player how to recover.
 
 ## Still open
 

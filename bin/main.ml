@@ -13,6 +13,8 @@ let rec play ~color game =
   print_string (Render.render ~color game);
   if Game.is_won game then print_endline "You solved the level!"
   else (
+    if Game.pieces_left game = [] && Board.placed (Game.board game) <> [] then
+      print_endline "No pieces left. Remove one to try again.";
     print_string "lumen> ";
     flush stdout;
     match input_line stdin with

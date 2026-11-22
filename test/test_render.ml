@@ -10,7 +10,7 @@ let renders_board_and_status _ =
      A = source E white\n\
      a = target white\n" |> Level.of_string |> Test_util.assert_ok |> Game.start
   in
-  assert_equal ~printer:Fun.id "@*-\nPieces left: mirror\nMoves: 0\n"
+  assert_equal ~printer:Fun.id "@*┄\nPieces left: mirror\nMoves: 0\n"
     (Render.render ~color:false game)
 
 let () =
