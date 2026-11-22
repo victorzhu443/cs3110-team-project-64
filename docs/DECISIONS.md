@@ -43,6 +43,7 @@ the current record.
 | D27 | A board with no targets counts as all lit. | DECIDED |
 | D28 | The shape of the trace result, and tracing a grid without a board. | DECIDED |
 | D29 | The terminal uses a glyph per board cell and ANSI color, with a plain-text render option. | DECIDED |
+| D30 | The terminal takes a level path and ends the session on a win, quit, or end of input. | DECIDED |
 
 ## Decisions since Nov 17
 
@@ -210,6 +211,21 @@ ALX-2 clarifications from Alex on Nov 21:
 Review follow-up on PR #19: Alex approved dashed beam glyphs
 (`┄`, `┆`, `⋰`, `⋱`) so they remain distinct from pieces in plain text.
 The renderer uses the basic eight ANSI colors for terminal compatibility.
+
+### D30 — Terminal session (ALX-4)
+
+- **What:** The terminal takes a level file path and redraws the board as the
+  player enters commands. Invalid commands and rejected moves display the
+  existing Game error messages and leave the session running. The session
+  ends on `quit`, end of input, or a win. The win message is
+  `You solved the level!`. Set `NO_COLOR=1` for plain output.
+- **Alternative considered:** Keep accepting moves after a win.
+- **Why:** Ending at the win gives the tutorial a clear finish. Plain output
+  makes the play-through easy to capture and read.
+- **Who agreed:** Alex, the terminal UI owner, on Nov 21.
+
+Review follow-up on PR #21: When the inventory is empty and a placed piece
+can be removed, an unsolved game tells the player how to recover.
 
 ## Still open
 

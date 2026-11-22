@@ -69,8 +69,8 @@ Keep both rows, then `git add README.md` and `git commit`.
 
 ## Repository layout
 
-Nothing is built yet. MS1 is a plan, not a prototype. The OCaml project will be
-created for MS2.
+The terminal game is in `bin/main.ml`, the game modules are in `lib/`,
+and the tutorial level is in `levels/tutorial01.lvl`.
 
 ## Running the tests
 
@@ -99,9 +99,23 @@ several files are in `test/test_util.ml`. Expected answers are worked out by
 hand from a drawing of the board, or are properties that must hold for every
 input. They are never copied from what the code printed.
 
-## Planned player commands
+## Build and play
 
-The terminal game will accept one command per line. Use zero-based coordinates,
+From the repository root, activate your course OPAM switch and run:
+
+```sh
+dune build
+dune exec ./bin/main.exe -- levels/tutorial01.lvl
+```
+
+Set `NO_COLOR=1` before `dune exec` for plain-text output. The grid uses `@`
+for the source, `o` for a dark target, and `*` for a lit target. To solve the
+tutorial, direct the white light to both targets using the splitter and
+mirror in your inventory. The game prints `You solved the level!` when both
+targets are lit. See the [tutorial play-through](docs/TUTORIAL-PLAYTHROUGH.md)
+for a recorded solution.
+
+Type one command per line. Use zero-based coordinates,
 with the row first. The top-left cell is row 0, column 0.
 
 | Command | Action |
