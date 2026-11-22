@@ -207,6 +207,10 @@ ALX-2 clarifications from Alex on Nov 21:
   tests. Color shows the light and target colors in the terminal.
 - **Who agreed:** Alex, the terminal UI owner, on Nov 21.
 
+Review follow-up on PR #19: Alex approved dashed beam glyphs
+(`┄`, `┆`, `⋰`, `⋱`) so they remain distinct from pieces in plain text.
+The renderer uses the basic eight ANSI colors for terminal compatibility.
+
 ## Still open
 
 | # | Question | Owner | Needed by |

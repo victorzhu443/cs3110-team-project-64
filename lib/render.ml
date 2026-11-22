@@ -6,13 +6,13 @@ module Cells = Map.Make (struct
   let compare = compare
 end)
 
-type beam = { glyph : char; color : color }
+type beam = { glyph : string; color : color }
 
 let beam_glyph = function
-  | E | W -> '-'
-  | NE | SW -> '/'
-  | N | S -> '|'
-  | NW | SE -> '\\'
+  | E | W -> "┄"
+  | NE | SW -> "⋰"
+  | N | S -> "┆"
+  | NW | SE -> "⋱"
 
 let mix a b = { r = a.r || b.r; g = a.g || b.g; b = a.b || b.b }
 
@@ -25,7 +25,7 @@ let beam_cells (segments : Tracer.segment list) =
         (function
           | None -> Some { glyph; color }
           | Some beam ->
-              let glyph = if beam.glyph = glyph then glyph else '+' in
+              let glyph = if beam.glyph = glyph then glyph else "+" in
               Some { glyph; color = mix beam.color color })
         cells)
     Cells.empty segments
@@ -39,15 +39,13 @@ let splitter_glyph = function
 let colorize enabled ~dim color glyph =
   if not enabled then glyph
   else
-    let channel on = if on then 255 else 0 in
-    let r, g, b =
-      if color.r || color.g || color.b then
-        (channel color.r, channel color.g, channel color.b)
-      else (110, 110, 110)
+    let channel bit on = if on then bit else 0 in
+    let foreground =
+      30 + channel 1 color.r + channel 2 color.g + channel 4 color.b
     in
-    Printf.sprintf "\027[%s38;2;%d;%d;%dm%s\027[0m"
-      (if dim then "2;" else "")
-      r g b glyph
+    (* Keep black light visible on terminals with a dark background. *)
+    let codes = if foreground = 30 then "30;47" else string_of_int foreground in
+    Printf.sprintf "\027[%s%sm%s\027[0m" (if dim then "2;" else "") codes glyph
 
 let piece_glyph color targets pos = function
   | Wall -> "#"
@@ -84,8 +82,7 @@ let render ?(color = true) game =
     | Ok Board.Empty | Error _ -> (
         match Cells.find_opt pos beams with
         | None -> "."
-        | Some beam ->
-            colorize color ~dim:false beam.color (String.make 1 beam.glyph))
+        | Some beam -> colorize color ~dim:false beam.color beam.glyph)
   in
   let output = Buffer.create 128 in
   for row = 0 to Board.rows board - 1 do
