@@ -42,6 +42,7 @@ the current record.
 | D26 | A splitter hit edge-on sends one beam; a splitter hit square-on sends one on and one back. | DECIDED |
 | D27 | A board with no targets counts as all lit. | DECIDED |
 | D28 | The shape of the trace result, and tracing a grid without a board. | DECIDED |
+| D29 | The terminal uses a glyph per board cell and ANSI color, with a plain-text render option. | DECIDED |
 
 ## Decisions since Nov 17
 
@@ -192,6 +193,23 @@ ALX-2 clarifications from Alex on Nov 21:
   endings from.
 - **Who agreed:** Anvi as tracer owner and Victor, who wrote it (#6). Sohan
   approved #6 and builds the generator on `trace_grid` (#9).
+
+### D29 — Board rendering (ALX-3)
+
+- **What:** The grid shows empty cells as dots, walls as hashes, sources as
+  `@`, dark targets as `o`, and lit targets as `*`. Mirrors use their
+  orientation symbols and splitters use distinct line glyphs. Beams follow
+  their axis and use `+` where different axes cross in an empty cell. A
+  piece stays visible when a beam passes through it. The inventory and
+  move count appear below the grid.
+- **Alternative considered:** Always include color escapes in the renderer.
+- **Why:** Plain output is readable in transcripts and can be compared by
+  tests. Color shows the light and target colors in the terminal.
+- **Who agreed:** Alex, the terminal UI owner, on Nov 21.
+
+Review follow-up on PR #19: Alex approved dashed beam glyphs
+(`┄`, `┆`, `⋰`, `⋱`) so they remain distinct from pieces in plain text.
+The renderer uses the basic eight ANSI colors for terminal compatibility.
 
 ## Still open
 
