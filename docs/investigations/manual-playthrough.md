@@ -14,11 +14,10 @@ The README's "Build and play" section, as written.
 | 2 | `place 9 9 mirror /` | A clear error, game continues | "(9, 9) is not on the board." The board, pieces and move count were unchanged and the prompt came back | Yes |
 | 3 | `fly` | "Invalid command", game continues | "Invalid command. Type help for usage." Nothing changed | Yes |
 | 4 | `rotate 0 0` | Error, nothing changes | "There is no piece of yours at (0, 0) to change." Nothing changed | Yes |
-| 5 | `remove 1 3` after placing | The splitter returns to "Pieces left" | The splitter came back ("Pieces left: splitter, mirror") and its beams disappeared, but "Moves" went from 1 to 2 | Yes, see below |
+| 5 | `remove 1 3` after placing | The splitter returns to "Pieces left" | The splitter came back ("Pieces left: splitter, mirror") and its beams disappeared, and "Moves" went from 1 to 2 | Yes |
 | 6 | Run with `nope.lvl` | A message that the file could not be read | "The level file could not be read: nope.lvl: No such file or directory" | Yes |
 | 7 | Colors on | Beams and targets drawn in their colors | The tutorial's beams are white, which shows as grey in my terminal; unlit targets are dim. No other colors appear on this level | Yes, but hard to read |
 
 ## Anything confusing or wrong
-- Removing a piece counts as a move (row 5). Check with Alex whether that is intended; the plan left "whether rotating and removing count as moves" to Alex.
 - White beams look grey, so they barely stand out from the board. Bright white or bold could help in MS3.
 - The tutorial only uses white light, so this check does not exercise colored beams or color mixing.
