@@ -75,3 +75,20 @@ let search ?(candidates = fun _ remaining -> remaining) ~(slots : pos list)
         try_cells cells
   in
   go pieces slots []
+
+let apply (b : Board.t) (ps : placement list) : (Board.t, Board.error) result =
+  List.fold_left
+    (fun acc { piece; at } ->
+      match acc with Ok b -> Board.place b at piece | Error _ as e -> e)
+    (Ok b) ps
+
+let solve (b : Board.t) (pieces : piece list) : placement list option =
+  (* A placement the board refuses cannot be part of a solution; [search] only
+     offers empty cells, so in practice that is a piece the player may not
+     place. *)
+  let solved ps =
+    match apply b ps with
+    | Ok b' -> (Tracer.trace b').all_lit
+    | Error _ -> false
+  in
+  search ~slots:(Board.empty_cells b) ~pieces ~solved ()
