@@ -38,6 +38,12 @@ the current record.
 | D22 | Tracer rules for paths, mirrors, sources, crossings and splitters. | DECIDED |
 | D23 | An agent may cross-check hand-worked expected answers after the human has written theirs. | DECIDED |
 | D24 | The terminal uses zero-based, row-first coordinates and counts each successful board edit as one move. | DECIDED |
+| D25 | A looping beam stops before it repeats a cell and direction, and ends as a loop. | DECIDED |
+| D26 | A splitter hit edge-on sends one beam; a splitter hit square-on sends one on and one back. | DECIDED |
+| D27 | A board with no targets counts as all lit. | DECIDED |
+| D28 | The shape of the trace result, and tracing a grid without a board. | DECIDED |
+| D29 | The terminal uses a glyph per board cell and ANSI color, with a plain-text render option. | DECIDED |
+| D30 | The terminal takes a level path and ends the session on a win, quit, or end of input. | DECIDED |
 
 ## Decisions since Nov 17
 
@@ -87,6 +93,12 @@ the current record.
   white beam would light every target and MS3's prism and filter would lose their
   purpose. Mixing at targets overlaps with the MS3 combiner; revisit in the MS3 plan.
 - **Who agreed:** the team, in the group chat, Nov 18.
+- **What follows:** lighting is not one-way. Adding a beam can turn a lit
+  target dark (a red target lit by red goes dark when a blue beam also crosses
+  it). So the win check is made after every move, not once a target lights;
+  backwards construction must make a target the mix of every beam through its
+  cell; and the solver cannot stop early because a target is lit. Raised by
+  Victor on #6.
 
 ### D22 — Tracer rules
 
@@ -129,6 +141,92 @@ Nov 18. They go into the `tracer.mli` comments.
   file coordinates. The orientation symbols match the level format.
 - **Who agreed:** Alex, the game and terminal UI owner, on Nov 20.
 
+ALX-2 clarifications from Alex on Nov 21:
+
+- Coordinates use nonnegative decimal integers.
+- Placement checks the board before checking inventory. Removing a piece
+  returns it in the orientation it had in the starting inventory.
+- Invalid commands prompt the player to type `help`. An empty inventory
+  names the unavailable piece kind. Board errors keep the Board wording.
+
+### D25 — Loops (resolves L1)
+
+- **What:** a beam whose next cell is one it already entered travelling the
+  same way stops where it is. That cell is not listed again; the ending's
+  reason is `Looped` and its `last` is the last cell of the path.
+- **Alternatives:** list the repeated cell once more; record no separate
+  reason.
+- **Why:** every cell in the path is one the beam really lit, and a loop is
+  visible in the result without comparing cells.
+- **Who agreed:** Anvi as tracer owner, accepting Victor's version in #6
+  (Nov 20).
+
+### D26 — Splitters edge-on and square-on (resolves S2/S3)
+
+- **What:** these follow from D22's splitter rule (the turned beam goes where a
+  mirror would send it). Edge-on, the turned beam and the straight beam are the
+  same way, so one beam leaves. Square-on, one beam goes straight on and one
+  comes straight back.
+- **Who agreed:** Anvi, Nov 18, as part of D22.
+
+### D27 — No targets means all lit
+
+- **What:** `all_lit` is true on a board with no targets.
+- **Alternatives:** false, so that a board must have a target to be solved.
+- **Why:** "every target is lit" is true when there are none. If a level must
+  have a target, that check belongs in level validation (Akshay), not in the
+  tracer.
+- **Who agreed:** Anvi, accepting Victor's version in #6 (Nov 20).
+
+### D28 — The trace result (resolves the result-shape question; SOH-2)
+
+- **What:** `Tracer.trace : Board.t -> result` wraps
+  `Tracer.trace_grid ~rows ~cols ~cell_at`, so tests and the generator can
+  trace a grid without a board. A `result` holds `segments` (each cell of each
+  beam, with `at`, `entered`, `dir` and `color`; a cell appears once per beam
+  through it), `endings` (one per beam, each splitter branch its own, with
+  `last`, `heading`, `beam_color` and a `reason`: `Left_board`, `Hit_wall`,
+  `Hit_mirror_edge` or `Looped`), `targets` (in reading order, each with the
+  mix that reached it, or `None`) and `all_lit`.
+- **Alternatives:** trace only a `Board.t`; hold a split beam as a tree.
+- **Why:** the rules can be tested on a grid written as text before the board
+  works, and a flat list is simple for Alex to draw and for Sohan to read
+  endings from.
+- **Who agreed:** Anvi as tracer owner and Victor, who wrote it (#6). Sohan
+  approved #6 and builds the generator on `trace_grid` (#9).
+
+### D29 — Board rendering (ALX-3)
+
+- **What:** The grid shows empty cells as dots, walls as hashes, sources as
+  `@`, dark targets as `o`, and lit targets as `*`. Mirrors use their
+  orientation symbols and splitters use distinct line glyphs. Beams follow
+  their axis and use `+` where different axes cross in an empty cell. A
+  piece stays visible when a beam passes through it. The inventory and
+  move count appear below the grid.
+- **Alternative considered:** Always include color escapes in the renderer.
+- **Why:** Plain output is readable in transcripts and can be compared by
+  tests. Color shows the light and target colors in the terminal.
+- **Who agreed:** Alex, the terminal UI owner, on Nov 21.
+
+Review follow-up on PR #19: Alex approved dashed beam glyphs
+(`┄`, `┆`, `⋰`, `⋱`) so they remain distinct from pieces in plain text.
+The renderer uses the basic eight ANSI colors for terminal compatibility.
+
+### D30 — Terminal session (ALX-4)
+
+- **What:** The terminal takes a level file path and redraws the board as the
+  player enters commands. Invalid commands and rejected moves display the
+  existing Game error messages and leave the session running. The session
+  ends on `quit`, end of input, or a win. The win message is
+  `You solved the level!`. Set `NO_COLOR=1` for plain output.
+- **Alternative considered:** Keep accepting moves after a win.
+- **Why:** Ending at the win gives the tutorial a clear finish. Plain output
+  makes the play-through easy to capture and read.
+- **Who agreed:** Alex, the terminal UI owner, on Nov 21.
+
+Review follow-up on PR #21: When the inventory is empty and a placed piece
+can be removed, an unsolved game tells the player how to recover.
+
 ## Still open
 
 | # | Question | Owner | Needed by |
@@ -137,10 +235,7 @@ Nov 18. They go into the `tracer.mli` comments.
 | O4 | Remove the eight co-author lines (D16)? | Victor; Anvi follows up | Before H1a, or after the MS1 grade |
 | O5 | Handout section 07, the rubric, the report template, the ZIP's required name | Anvi | Deferred while code gets started; before H6 (Sun Nov 22, 6pm) |
 | O9 | Which OPAM switch everyone builds with | Akshay, with Victor | H1a |
-| L1 | When a beam loops, is the repeated cell listed again, and is the end recorded as "loop"? | Anvi | ANV-8 (H3b) |
-| S2/S3 | What a splitter does when hit edge-on, and when hit square-on | Anvi | ANV-8 (H3b) |
-| — | Whether "every target lit" is true on a board with no targets | Anvi | ANV-5 (`tracer.mli`) |
-| — | The shape of the trace result, including how a split beam is held (Sohan and Alex rely on it) | Anvi, with Sohan | ANV-5 / H1c |
+| — | A splitter's branches share one loop check. Could a second branch of the same beam be wrongly cut off as a loop? Victor could not build a case where it happens (#6). | Anvi | ANV-8 follow-up |
 
 Rule details each owner proposes in their `.mli` and records here (plan
 section 5.4): which pieces rotate and through how many orientations (Akshay);

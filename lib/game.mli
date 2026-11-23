@@ -15,13 +15,19 @@ type move =
 type command = Move of move | Help | Quit
 
 (** Why a line could not be parsed. *)
-type parse_error = Invalid_command | Parser_not_implemented
+type parse_error = Invalid_command
 
 (** Why a move could not be applied. *)
 type move_error =
   | Piece_unavailable of Types.piece
   | Board_error of Board.error
-  | Move_not_implemented
+
+val string_of_parse_error : parse_error -> string
+(** [string_of_parse_error error] is the player-facing message for [error]. *)
+
+val string_of_move_error : move_error -> string
+(** [string_of_move_error error] is the player-facing message for [error]. Board
+    errors use {!Board.string_of_error}. *)
 
 val start : Level.t -> t
 (** [start level] starts a game on [level]'s board with its full inventory and
@@ -43,18 +49,18 @@ val is_won : t -> bool
 val parse_command : string -> (command, parse_error) result
 (** [parse_command line] reads one whitespace-separated command from [line]. The
     commands are [place ROW COL PIECE ORIENTATION], [rotate ROW COL],
-    [remove ROW COL], [help], and [quit]. Coordinates are zero-based, row first.
-    [PIECE] is [mirror] or [splitter]. The orientation is one of [-], [/], [|],
-    or the backslash character.
+    [remove ROW COL], [help], and [quit]. Coordinates are nonnegative decimal
+    integers, zero-based and row first. [PIECE] is [mirror] or [splitter]. The
+    orientation is one of [-], [/], [|], or the backslash character.
 
-    Returns [Invalid_command] for malformed input. The ALX-1 stub returns
-    [Parser_not_implemented]. *)
+    Returns [Invalid_command] for malformed input. *)
 
 val apply : t -> move -> (t, move_error) result
 (** [apply game move] returns the game after [move], with one move added to the
     count. Placement uses one piece of the requested kind regardless of its
-    orientation. Removal returns one piece of that kind.
+    orientation. Removal returns one piece of that kind in its inventory
+    orientation.
 
     Returns [Piece_unavailable] when the requested kind is out of stock or
-    [Board_error] when the board rejects the move. The ALX-1 stub returns
-    [Move_not_implemented]. *)
+    [Board_error] when the board rejects the move. Board validation comes first.
+    If a move fails, [game] is unchanged. *)
