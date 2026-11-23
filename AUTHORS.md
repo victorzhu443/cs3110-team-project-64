@@ -60,9 +60,9 @@ the two pull-request reviewers.
 | Component | Member | How AI was used | Who reviewed it |
 |---|---|---|---|
 | Board and level files | Akshay Joshi |  |  |
-| Beam tracer | Anvi Savant |  |  |
-| Solver | Victor Zhu |  |  |
+| Beam tracer | Anvi Savant | Claude Code drafted the tracer changes for color mixing and edge-on stops, the write-up and pictures of the 17 hand-worked boards, and the tests built from them. Anvi decided every rule and worked every answer by hand first; the agent then worked them by reasoning, not by running code, and all 17 matched. Rows for #6, #8 and #12 in the AI log | Sohan Madishetty, Victor Zhu |
+| Solver | Victor Zhu | Claude Code drafted `apply`, `solve`, their interface comments and eight level tests, and proposed the expected answers by reasoning from the drawings; Victor checked all eight against the drawings before the tests were run. It also drafted the timing harness and write-up, which Victor read, checking the four-mirror argument against the drawings. Rows for #16 and #17 in the AI log | Sohan Madishetty, Anvi Savant |
 | Generator and test harness | Sohan Madishetty | Claude Code wrote the generator, its seed tests and the shared test helpers, and drafted the pull request descriptions. Sohan read the code and ran `dune test`; the tests check properties from `generator.mli` over seeds 1 to 200 (D13). Rows for #3 and #9 in the AI log | Alex Fisher, Akshay Joshi |
-| Game state and terminal UI | Alex Fisher | | |
-| Project documents and planning | Anvi Savant |  |  |
-| Repository and MS1 set-up | Victor Zhu |  |  |
+| Game state and terminal UI | Alex Fisher | Codex drafted the game and render interfaces, the game state and command parser, the renderer, the terminal loop, their tests and the README instructions, and worked out the tests' expected results from the level drawing. Alex chose the command syntax, error wording, display glyphs and exit behavior. Rows for #10, #18, #19 and #21 in the AI log | Sohan Madishetty, Anvi Savant |
+| Project documents and planning | Anvi Savant | Claude drafted the MS2 plan, the pull-request template, the decision record, the agent rules, the MS2 checklist and the AI log's introduction from decisions already made. Anvi made each decision and reviewed and edited every file before it was committed. Rows for the plan, #2, #7 and #11 in the AI log | Sohan Madishetty, Victor Zhu |
+| Repository and MS1 set-up | Victor Zhu | Claude drafted the README, team contract, `AUTHORS.md`, MS1 checklist and their commit messages in eight commits (Nov 2–4). Rows in the AI log | none (before the pull-request rule) |
